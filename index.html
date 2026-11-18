@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aula Virtual y Transmisiones en Vivo | USJT</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Librería ligera para generar PDF de constancia en el navegador sin cargar el servidor -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
       --guinda: #691C32; --guinda-claro: #8B2645; --guinda-oscuro: #4B1122;
@@ -12,47 +14,74 @@
       --fondo-oscuro: #1E0A14; --fondo-claro: #F8FAFC;
       --texto-oscuro: #1E293B; --texto-gris: #64748B;
       --error-bg: #FEE2E2; --error-txt: #991B1B;
+      --ok-bg: #DCFCE7; --ok-txt: #166534;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
     html, body { height: 100%; background-color: var(--fondo-claro); color: var(--texto-oscuro); }
     body { display: flex; flex-direction: column; }
 
+    /* CINTILLA SUPERIOR AMPLIADA */
     header {
       background: linear-gradient(90deg, var(--fondo-oscuro) 0%, var(--guinda) 100%);
-      color: #FFFFFF; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 3px solid var(--oro); box-shadow: 0 4px 12px rgba(56, 10, 23, 0.25); z-index: 10; flex-shrink: 0;
+      color: #FFFFFF; padding: 20px 32px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 4px solid var(--oro); box-shadow: 0 4px 14px rgba(56, 10, 23, 0.28); z-index: 20; flex-shrink: 0; gap: 16px;
     }
-    .brand { display: flex; align-items: center; gap: 14px; }
-    .brand-badge { background: var(--oro); color: var(--fondo-oscuro); font-weight: 700; padding: 6px 12px; border-radius: 6px; font-size: 14px; }
-    .brand-title h1 { font-size: 17px; font-weight: 700; }
-    .brand-title span { font-size: 12px; color: var(--oro-suave); display: block; }
+    .brand { display: flex; align-items: center; gap: 16px; }
+    .brand-logo-box {
+      background: rgba(255,255,255,0.95); padding: 6px 12px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; height: 48px; border: 1.5px solid var(--oro);
+    }
+    .brand-logo-box img { max-height: 36px; width: auto; display: block; }
+    .brand-title h1 { font-size: 19px; font-weight: 700; letter-spacing: -0.2px; }
+    .brand-title span { font-size: 13px; color: var(--oro-suave); display: block; margin-top: 2px; }
 
-    .btn-registro-top {
+    .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .user-pill {
+      display: none; align-items: center; gap: 8px; background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(188, 149, 92, 0.5); padding: 7px 14px; border-radius: 20px; font-size: 12.5px; color: var(--oro-crema);
+    }
+    .btn-registro-top, .btn-salir-top, .btn-constancia-top {
       background: transparent; border: 1.5px solid var(--oro); color: var(--oro-crema);
-      padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
+      padding: 9px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
     }
     .btn-registro-top:hover { background: var(--oro); color: var(--fondo-oscuro); }
+    .btn-constancia-top { display: none; background: var(--oro); color: var(--fondo-oscuro); }
+    .btn-constancia-top:hover { background: var(--oro-crema); }
+    .btn-salir-top { display: none; border-color: #FCA5A5; color: #FECACA; }
+    .btn-salir-top:hover { background: #991B1B; border-color: #991B1B; color: #FFF; }
 
+    /* VISTA PORTAL DE INICIO */
     #portal-view {
-      flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px 20px;
-      background: radial-gradient(circle at top right, rgba(188, 149, 92, 0.12), transparent 50%),
-                  radial-gradient(circle at bottom left, rgba(105, 28, 50, 0.08), transparent 50%);
+      flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 32px 24px 20px;
+      background: radial-gradient(circle at top right, rgba(188, 149, 92, 0.14), transparent 50%),
+                  radial-gradient(circle at bottom left, rgba(105, 28, 50, 0.09), transparent 50%);
+      overflow-y: auto;
     }
-    .portal-grid { max-width: 1040px; width: 100%; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; align-items: center; }
+    .portal-grid { max-width: 1080px; width: 100%; margin: auto; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; align-items: center; }
+
+    /* LOGOS EN INTERFAZ DE INICIO */
+    .logos-portal-bar {
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 18px;
+    }
+    .logo-chip {
+      background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 8px 14px;
+      height: 58px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .logo-chip img { max-height: 42px; width: auto; display: block; }
 
     .tag-vivo {
       display: inline-flex; align-items: center; gap: 8px; background: var(--oro-suave); color: var(--guinda);
-      font-weight: 700; font-size: 12px; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--oro); margin-bottom: 18px;
+      font-weight: 700; font-size: 12px; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--oro); margin-bottom: 14px;
     }
     .dot-pulse { width: 8px; height: 8px; background: var(--guinda); border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    .event-info h2 { font-size: 32px; color: var(--guinda-oscuro); line-height: 1.2; margin-bottom: 16px; }
-    .event-info p { font-size: 15px; color: var(--texto-gris); line-height: 1.6; margin-bottom: 24px; }
+    .event-info h2 { font-size: 31px; color: var(--guinda-oscuro); line-height: 1.2; margin-bottom: 14px; }
+    .event-info p { font-size: 15px; color: var(--texto-gris); line-height: 1.6; margin-bottom: 22px; }
 
-    .event-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 28px; }
+    .event-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px; }
     .meta-card { background: #FFFFFF; border-left: 4px solid var(--oro); padding: 12px 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-    .meta-card strong { display: block; font-size: 12px; color: var(--guinda); text-transform: uppercase; margin-bottom: 2px; }
+    .meta-card strong { display: block; font-size: 11.5px; color: var(--guinda); text-transform: uppercase; margin-bottom: 3px; }
     .meta-card span { font-size: 14px; font-weight: 500; color: var(--texto-oscuro); }
 
     .btn-secundario {
@@ -61,14 +90,21 @@
     }
     .btn-secundario:hover { background: var(--oro); color: var(--fondo-oscuro); }
 
-    .login-card { background: #FFFFFF; border-radius: 14px; padding: 36px 32px; box-shadow: 0 12px 32px rgba(56, 10, 23, 0.12); border-top: 5px solid var(--guinda); }
+    /* TARJETA LOGIN + ICONO OJITO */
+    .login-card { background: #FFFFFF; border-radius: 14px; padding: 34px 30px; box-shadow: 0 12px 32px rgba(56, 10, 23, 0.12); border-top: 5px solid var(--guinda); }
     .login-card h3 { font-size: 20px; color: var(--guinda-oscuro); margin-bottom: 6px; }
     .login-card .sub { font-size: 13px; color: var(--texto-gris); margin-bottom: 22px; }
 
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--texto-oscuro); margin-bottom: 6px; }
-    .form-group input { width: 100%; padding: 12px 14px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-size: 14px; }
+    .input-wrap { position: relative; display: flex; align-items: center; }
+    .form-group input { width: 100%; padding: 12px 42px 12px 14px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-size: 14px; }
     .form-group input:focus { outline: none; border-color: var(--guinda); }
+    .toggle-pass {
+      position: absolute; right: 10px; background: none; border: none; color: var(--texto-gris);
+      cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;
+    }
+    .toggle-pass:hover { color: var(--guinda); }
 
     .btn-ingresar {
       width: 100%; padding: 13px; background: linear-gradient(135deg, var(--guinda) 0%, var(--guinda-oscuro) 100%);
@@ -79,22 +115,57 @@
 
     #error-msg { display: none; margin-top: 14px; padding: 10px 12px; background: var(--error-bg); color: var(--error-txt); border-radius: 6px; font-size: 13px; font-weight: 500; text-align: center; }
 
-    #stream-view { display: none; flex: 1; width: 100%; min-height: calc(100vh - 68px); background: var(--fondo-oscuro); flex-direction: row; }
-    #video-wrapper { flex: 1; min-width: 0; min-height: calc(100vh - 68px); background: #000; position: relative; }
-    #chat-wrapper { width: 380px; flex-shrink: 0; min-height: calc(100vh - 68px); border-left: 2px solid var(--guinda); background: #14070D; position: relative; }
+    .portal-footer-logos {
+      max-width: 1080px; width: 100%; margin: 24px auto 0; padding-top: 14px; border-top: 1px solid #E2E8F0;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--texto-gris);
+    }
+
+    /* VISTA DE TRANSMISIÓN ADAPTATIVA (CON SUB-CINTILLA SIN RECORTAR VIDEO) */
+    #stream-view {
+      display: none; flex: 1; min-height: 0; width: 100%; background: var(--fondo-oscuro); flex-direction: column;
+    }
+    .stream-subbar {
+      background: #2A0E1B; border-bottom: 1.5px solid rgba(188, 149, 92, 0.45); padding: 8px 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-shrink: 0; flex-wrap: wrap;
+    }
+    .subbar-info { display: flex; align-items: center; gap: 12px; color: #FFF; }
+    .subbar-badge { background: var(--guinda); border: 1px solid var(--oro); color: var(--oro-crema); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 4px; }
+    .subbar-title { font-size: 13.5px; font-weight: 600; color: var(--oro-crema); }
+    .subbar-logos { display: flex; align-items: center; gap: 10px; }
+    .subbar-logos img { height: 28px; width: auto; background: #FFF; padding: 3px 7px; border-radius: 5px; }
+    .timer-badge {
+      font-size: 12px; color: var(--oro-suave); background: rgba(0,0,0,0.35); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(188,149,92,0.3);
+    }
+
+    .stream-stage {
+      flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: row;
+    }
+    #video-wrapper { flex: 1; min-width: 0; min-height: 0; background: #000; position: relative; }
+    #chat-wrapper { width: 380px; flex-shrink: 0; min-height: 0; border-left: 2px solid var(--guinda); background: #14070D; position: relative; }
     #video-wrapper iframe, #chat-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
-    #modal-registro { display: none; position: fixed; inset: 0; background: rgba(30, 10, 20, 0.75); z-index: 50; justify-content: center; align-items: center; padding: 20px; }
+    /* MODALES (REGISTRO Y CONSTANCIA) */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30, 10, 20, 0.78); z-index: 50; justify-content: center; align-items: center; padding: 20px; }
     .modal-content { background: #FFFFFF; width: 100%; max-width: 680px; height: 85vh; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; border-top: 5px solid var(--oro); }
+    .modal-content.modal-sm { height: auto; max-width: 480px; }
     .modal-header { background: var(--guinda); color: #FFF; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
     .close-modal { background: none; border: none; color: var(--oro-crema); font-size: 24px; cursor: pointer; line-height: 1; }
     .modal-body { flex: 1; }
     .modal-body iframe { width: 100%; height: 100%; border: none; }
+    .constancia-box { padding: 24px; text-align: center; }
+    .constancia-box p { font-size: 14px; color: var(--texto-gris); margin-bottom: 16px; line-height: 1.5; }
+    .status-pill { display: inline-block; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 18px; }
+    .status-ok { background: var(--ok-bg); color: var(--ok-txt); }
+    .status-wait { background: var(--oro-suave); color: var(--guinda); }
 
     @media (max-width: 1024px) {
+      html, body { height: auto; min-height: 100%; }
+      header { padding: 14px 18px; }
+      .brand-title h1 { font-size: 16px; }
       .portal-grid { grid-template-columns: 1fr; gap: 24px; }
-      #stream-view { flex-direction: column; min-height: auto; }
-      #video-wrapper { width: 100%; aspect-ratio: 16 / 9; min-height: 240px; max-height: 60vh; }
+      #stream-view { height: auto; }
+      .stream-stage { flex-direction: column; }
+      #video-wrapper { width: 100%; aspect-ratio: 16 / 9; min-height: 230px; max-height: 55vh; }
       #chat-wrapper { width: 100%; height: 420px; min-height: 420px; border-left: none; border-top: 2px solid var(--guinda); }
     }
   </style>
@@ -103,29 +174,52 @@
 
   <header>
     <div class="brand">
-      <div class="brand-badge">USJT</div>
+      <div class="brand-logo-box">
+        <img src="img/logo-usjt.png" alt="USJT" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2234%22><rect width=%2284%22 height=%2234%22 rx=%224%22 fill=%22%23691C32%22/><text x=%2242%22 y=%2222%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2215%22 fill=%22%23BC955C%22 text-anchor=%22middle%22>USJT</text></svg>';">
+      </div>
       <div class="brand-title">
         <h1>Aula Virtual y Transmisiones en Vivo</h1>
         <span>Plataforma Institucional de Educación Continua</span>
       </div>
     </div>
-    <button type="button" class="btn-registro-top" id="btn-header-reg" onclick="abrirModalRegistro()">Obtener Acceso / Registro</button>
+
+    <div class="header-actions">
+      <span class="user-pill" id="user-pill">👤 <strong id="lbl-usuario-activo"></strong></span>
+      <button type="button" class="btn-constancia-top" id="btn-header-constancia" onclick="abrirModalConstancia()">🎓 Constancia</button>
+      <button type="button" class="btn-registro-top" id="btn-header-reg" onclick="abrirModalRegistro()">Obtener Acceso / Registro</button>
+      <button type="button" class="btn-salir-top" id="btn-header-salir" onclick="cerrarSesion()">← Cerrar Sesión</button>
+    </div>
   </header>
 
+  <!-- VISTA 1: PORTAL DE INICIO DE SESIÓN -->
   <main id="portal-view">
     <div class="portal-grid">
       <section class="event-info">
+        <!-- LOGOS DEL CONGRESO E INSTITUCIONES PARTICIPANTES -->
+        <div class="logos-portal-bar">
+          <div class="logo-chip">
+            <img src="img/logo-congreso.png" alt="Logo Congreso" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%2238%22><rect width=%22140%22 height=%2238%22 rx=%225%22 fill=%22%23F5EDD8%22/><text x=%2270%22 y=%2223%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2212%22 fill=%22%23691C32%22 text-anchor=%22middle%22>LOGO CONGRESO</text></svg>';">
+          </div>
+          <div class="logo-chip">
+            <img src="img/logo-institucion-1.png" alt="Institución 1" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22130%22 height=%2238%22><rect width=%22130%22 height=%2238%22 rx=%225%22 fill=%22%23F1F5F9%22/><text x=%2265%22 y=%2223%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2211%22 fill=%22%23475569%22 text-anchor=%22middle%22>INSTITUCIÓN 1</text></svg>';">
+          </div>
+          <div class="logo-chip">
+            <img src="img/logo-institucion-2.png" alt="Institución 2" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22130%22 height=%2238%22><rect width=%22130%22 height=%2238%22 rx=%225%22 fill=%22%23F1F5F9%22/><text x=%2265%22 y=%2223%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2211%22 fill=%22%23475569%22 text-anchor=%22middle%22>INSTITUCIÓN 2</text></svg>';">
+          </div>
+        </div>
+
         <div class="tag-vivo"><span class="dot-pulse"></span> TRANSMISIÓN EN DIRECTO</div>
-        <h2>Conferencia Magistral y Clase Sincrónica</h2>
-        <p>Bienvenido a la sala oficial de transmisión. Para ingresar al aula y participar en el chat en tiempo real, utiliza el usuario y contraseña enviados a tu correo electrónico tras completar tu registro.</p>
+        <h2>Congreso Internacional y Conferencias Magistrales</h2>
+        <p>Bienvenido a la sala oficial de transmisión. Para ingresar al aula y registrar tu asistencia automática para constancia, utiliza el usuario y contraseña enviados a tu correo electrónico.</p>
+        
         <div class="event-meta">
           <div class="meta-card">
             <strong>Modalidad</strong>
             <span>En vivo (Streaming + Chat)</span>
           </div>
           <div class="meta-card">
-            <strong>Acceso</strong>
-            <span>Exclusivo con credencial</span>
+            <strong>Acreditación</strong>
+            <span>Conteo automático de asistencia</span>
           </div>
         </div>
         <button type="button" class="btn-secundario" onclick="abrirModalRegistro()">¿Aún no tienes clave? Regístrate aquí</button>
@@ -136,28 +230,57 @@
         <p class="sub">Introduce tus credenciales asignadas</p>
         <div class="form-group">
           <label for="usuario">Usuario</label>
-          <input type="text" id="usuario" placeholder="Ej. juan.perez42">
+          <input type="text" id="usuario" placeholder="Ej. juanmontel70" autocomplete="username">
         </div>
         <div class="form-group">
           <label for="password">Contraseña</label>
-          <input type="password" id="password" placeholder="••••••••">
+          <div class="input-wrap">
+            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+            <button type="button" class="toggle-pass" onclick="alternarPassword()" title="Mostrar u ocultar contraseña" aria-label="Mostrar contraseña">
+              <svg id="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
         </div>
         <button type="button" class="btn-ingresar" id="btn-entrar" onclick="iniciarSesion()">Entrar a la Transmisión</button>
         <div id="error-msg"></div>
       </section>
     </div>
+
+    <div class="portal-footer-logos">
+      <span>Universidad de Seguridad y Justicia de Tamaulipas • Plataforma Institucional</span>
+      <span>Soporte compatible con Safari, iOS, Android y Chrome</span>
+    </div>
   </main>
 
+  <!-- VISTA 2: SALA DE TRANSMISIÓN -->
   <section id="stream-view">
-    <div id="video-wrapper">
-      <iframe id="yt-video" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <div class="stream-subbar">
+      <div class="subbar-info">
+        <span class="subbar-badge" id="lbl-sesion-activa">EN VIVO</span>
+        <span class="subbar-title">Congreso Institucional USJT — Sala Principal</span>
+      </div>
+      <div class="subbar-logos">
+        <span class="timer-badge" id="lbl-tiempo-sesion">⏱ Tiempo en sala: 0 min</span>
+        <img src="img/logo-congreso.png" alt="Congreso" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2295%22 height=%2224%22><text x=%2247%22 y=%2216%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2210%22 fill=%22%23691C32%22 text-anchor=%22middle%22>CONGRESO</text></svg>';">
+        <img src="img/logo-institucion-1.png" alt="Aliado 1" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2285%22 height=%2224%22><text x=%2242%22 y=%2216%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2210%22 fill=%22%23475569%22 text-anchor=%22middle%22>ALIADO 1</text></svg>';">
+      </div>
     </div>
-    <div id="chat-wrapper">
-      <iframe id="yt-chat" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+
+    <div class="stream-stage">
+      <div id="video-wrapper">
+        <iframe id="yt-video" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <div id="chat-wrapper">
+        <iframe id="yt-chat" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </div>
     </div>
   </section>
 
-  <div id="modal-registro">
+  <!-- MODAL REGISTRO -->
+  <div id="modal-registro" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
         <h4>Registro de Asistencia — USJT</h4>
@@ -169,20 +292,49 @@
     </div>
   </div>
 
+  <!-- MODAL CONSTANCIA -->
+  <div id="modal-constancia" class="modal-overlay">
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h4>Constancia Digital de Participación</h4>
+        <button type="button" class="close-modal" onclick="cerrarModalConstancia()">&times;</button>
+      </div>
+      <div class="constancia-box">
+        <div id="constancia-status" class="status-pill status-wait">Verificando asistencia...</div>
+        <p id="constancia-detalle">Consultando tus minutos acumulados en la sesión actual.</p>
+        <button type="button" class="btn-ingresar" id="btn-descargar-pdf" style="display:none;" onclick="generarPDFConstancia()">Descargar Constancia en PDF</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxhLsSSXFAZiSiN8vX_SsPOYezKbCayEPf_1ReVide35H2NDxFI2NUI3_mpb7pfAKXcGQ/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwY_dzIAUvWmzdSRBuzcToanCsX_0PkXuaxCjQlf14tQkXBK3qRcmyHRYbWPeSEi2QgtQ/exec';
+
+    let sesionActiva = null;
+    let segundosPendientes = 0;
+    let segundosTotalesLocales = 0;
+    let intervaloContador = null;
+    let timeoutHeartbeat = null;
 
     document.getElementById('password').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') iniciarSesion();
     });
 
-    function abrirModalRegistro() {
-      document.getElementById('modal-registro').style.display = 'flex';
+    function alternarPassword() {
+      const input = document.getElementById('password');
+      const eye = document.getElementById('icon-eye');
+      if (input.type === 'password') {
+        input.type = 'text';
+        eye.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+      } else {
+        input.type = 'password';
+        eye.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+      }
     }
 
-    function cerrarModalRegistro() {
-      document.getElementById('modal-registro').style.display = 'none';
-    }
+    function abrirModalRegistro() { document.getElementById('modal-registro').style.display = 'flex'; }
+    function cerrarModalRegistro() { document.getElementById('modal-registro').style.display = 'none'; }
+    function cerrarModalConstancia() { document.getElementById('modal-constancia').style.display = 'none'; }
 
     function iniciarSesion() {
       const user = document.getElementById('usuario').value;
@@ -201,11 +353,17 @@
 
       fetch(API_URL, {
         method: 'POST',
-        body: JSON.stringify({ usuario: user, password: pass })
+        body: JSON.stringify({ accion: 'login', usuario: user, password: pass })
       })
       .then(response => response.json())
       .then(res => {
         if (res.autorizado) {
+          sesionActiva = {
+            usuario: res.usuario,
+            nombre: res.nombre,
+            sesion: res.sesion,
+            minutosMinimos: res.minutosMinimos
+          };
           cargarTransmision(res.videoId);
         } else {
           mostrarError(res.mensaje);
@@ -214,7 +372,7 @@
         }
       })
       .catch(() => {
-        mostrarError('Error de conexión con la base de datos. Verifica tu conexión.');
+        mostrarError('Error de conexión con la base de datos. Verifica tu red.');
         btn.disabled = false;
         btn.textContent = 'Entrar a la Transmisión';
       });
@@ -229,15 +387,177 @@
     function cargarTransmision(videoId) {
       document.getElementById('portal-view').style.display = 'none';
       document.getElementById('btn-header-reg').style.display = 'none';
+      
+      document.getElementById('lbl-usuario-activo').textContent = sesionActiva.nombre;
+      document.getElementById('lbl-sesion-activa').textContent = sesionActiva.sesion;
+      document.getElementById('user-pill').style.display = 'inline-flex';
+      document.getElementById('btn-header-constancia').style.display = 'inline-block';
+      document.getElementById('btn-header-salir').style.display = 'inline-block';
       document.getElementById('stream-view').style.display = 'flex';
 
       const dominioActual = window.location.hostname;
+      document.getElementById('yt-video').src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&origin=https://${dominioActual}`;
+      document.getElementById('yt-chat').src = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${dominioActual}&dark_theme=1`;
 
-      const ytVideo = document.getElementById('yt-video');
-      ytVideo.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&origin=https://${dominioActual}`;
+      iniciarConteoTiempo();
+    }
 
-      const ytChat = document.getElementById('yt-chat');
-      ytChat.src = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${dominioActual}&dark_theme=1`;
+    function cerrarSesion() {
+      enviarHeartbeat(true);
+      detenerConteoTiempo();
+      sesionActiva = null;
+
+      document.getElementById('yt-video').src = '';
+      document.getElementById('yt-chat').src = '';
+
+      document.getElementById('stream-view').style.display = 'none';
+      document.getElementById('user-pill').style.display = 'none';
+      document.getElementById('btn-header-constancia').style.display = 'none';
+      document.getElementById('btn-header-salir').style.display = 'none';
+
+      document.getElementById('portal-view').style.display = 'flex';
+      document.getElementById('btn-header-reg').style.display = 'inline-block';
+      const btn = document.getElementById('btn-entrar');
+      btn.disabled = false;
+      btn.textContent = 'Entrar a la Transmisión';
+    }
+
+    function iniciarConteoTiempo() {
+      segundosPendientes = 0;
+      segundosTotalesLocales = 0;
+
+      timeoutHeartbeat = setTimeout(cicloHeartbeat, 30000);
+
+      intervaloContador = setInterval(() => {
+        if (!sesionActiva) return;
+        segundosPendientes++;
+        segundosTotalesLocales++;
+        const mins = Math.floor(segundosTotalesLocales / 60);
+        document.getElementById('lbl-tiempo-sesion').textContent = `⏱ Tiempo en sala: ${mins} min`;
+      }, 1000);
+    }
+
+    function cicloHeartbeat() {
+      if (!sesionActiva) return;
+      enviarHeartbeat(false);
+      const siguienteIntervalo = Math.floor(240000 + Math.random() * 180000);
+      timeoutHeartbeat = setTimeout(cicloHeartbeat, siguienteIntervalo);
+    }
+
+    function enviarHeartbeat(usarBeacon) {
+      if (!sesionActiva || segundosPendientes < 5) return;
+      const envio = segundosPendientes;
+      segundosPendientes = 0;
+
+      const payload = JSON.stringify({
+        accion: 'heartbeat',
+        usuario: sesionActiva.usuario,
+        segundos: envio
+      });
+
+      if (usarBeacon && navigator.sendBeacon) {
+        navigator.sendBeacon(API_URL, payload);
+      } else {
+        fetch(API_URL, { method: 'POST', body: payload })
+          .then(r => r.json())
+          .then(res => {
+            if (res && res.retry) segundosPendientes += envio;
+          })
+          .catch(() => { segundosPendientes += envio; });
+      }
+    }
+
+    function detenerConteoTiempo() {
+      clearInterval(intervaloContador);
+      clearTimeout(timeoutHeartbeat);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && sesionActiva) {
+        enviarHeartbeat(true);
+      }
+    });
+
+    function abrirModalConstancia() {
+      if (!sesionActiva) return;
+      enviarHeartbeat(false);
+      document.getElementById('modal-constancia').style.display = 'flex';
+      const statusEl = document.getElementById('constancia-status');
+      const detalleEl = document.getElementById('constancia-detalle');
+      const btnPdf = document.getElementById('btn-descargar-pdf');
+
+      statusEl.className = 'status-pill status-wait';
+      statusEl.textContent = 'Consultando registro...';
+      btnPdf.style.display = 'none';
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ accion: 'consultar_constancia', usuario: sesionActiva.usuario })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.cumple) {
+          statusEl.className = 'status-pill status-ok';
+          statusEl.textContent = `✓ Acreditado (${res.minutos} min registrados)`;
+          detalleEl.innerHTML = `Has cumplido el tiempo mínimo requerido (<strong>${res.requeridos} min</strong>) para <strong>${res.sesion}</strong>. Ya puedes descargar tu constancia.`;
+          btnPdf.style.display = 'inline-block';
+        } else {
+          statusEl.className = 'status-pill status-wait';
+          statusEl.textContent = `En progreso: ${res.minutos} / ${res.requeridos} min`;
+          detalleEl.innerHTML = `Permanece conectado en la sesión <strong>${res.sesion}</strong> hasta completar al menos <strong>${res.requeridos} minutos</strong> para habilitar la descarga.`;
+        }
+      })
+      .catch(() => {
+        statusEl.textContent = 'No se pudo consultar en este momento';
+      });
+    }
+
+    function generarPDFConstancia() {
+      if (!sesionActiva || !window.jspdf) return;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+
+      doc.setDrawColor(105, 28, 50);
+      doc.setLineWidth(3);
+      doc.rect(10, 10, 259, 196);
+      doc.setDrawColor(188, 149, 92);
+      doc.setLineWidth(1);
+      doc.rect(14, 14, 251, 188);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(105, 28, 50);
+      doc.text('UNIVERSIDAD DE SEGURIDAD Y JUSTICIA DE TAMAULIPAS', 139.5, 42, { align: 'center' });
+
+      doc.setFontSize(12);
+      doc.setTextColor(188, 149, 92);
+      doc.text('OTORGA LA PRESENTE', 139.5, 58, { align: 'center' });
+
+      doc.setFontSize(28);
+      doc.setTextColor(30, 10, 20);
+      doc.text('CONSTANCIA DE PARTICIPACIÓN', 139.5, 74, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(13);
+      doc.setTextColor(71, 85, 105);
+      doc.text('A:', 139.5, 92, { align: 'center' });
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.setTextColor(105, 28, 50);
+      doc.text(sesionActiva.nombre.toUpperCase(), 139.5, 106, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.setTextColor(30, 41, 59);
+      doc.text(`Por su asistencia y participación en: "${sesionActiva.sesion}"`, 139.5, 124, { align: 'center' });
+
+      const folio = `USJT-${sesionActiva.usuario.toUpperCase()}-${new Date().getFullYear()}`;
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Folio de verificación institucional: ${folio}`, 139.5, 182, { align: 'center' });
+
+      doc.save(`Constancia_${sesionActiva.usuario}.pdf`);
     }
   </script>
 </body>
