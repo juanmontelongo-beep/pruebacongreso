@@ -422,16 +422,22 @@
       btn.textContent = 'Entrar a la Transmisión';
     }
 
+    // CONTADOR CALIBRADO PARA 1,000 USUARIOS + RESPALDO EN LOCALSTORAGE
     function iniciarConteoTiempo() {
-      segundosPendientes = 0;
-      segundosTotalesLocales = 0;
+      const claveRespaldo = `usjt_pendiente_${sesionActiva.usuario}`;
+      segundosPendientes = Number(localStorage.getItem(claveRespaldo)) || 0;
+      segundosTotalesLocales = segundosPendientes;
 
-      timeoutHeartbeat = setTimeout(cicloHeartbeat, 30000);
+      // Primer pulso escalonado entre 2 y 8 minutos para evitar picos al inicio
+      const primerPulso = Math.floor(120000 + Math.random() * 360000);
+      timeoutHeartbeat = setTimeout(cicloHeartbeat, primerPulso);
 
       intervaloContador = setInterval(() => {
         if (!sesionActiva) return;
         segundosPendientes++;
         segundosTotalesLocales++;
+        localStorage.setItem(claveRespaldo, segundosPendientes);
+
         const mins = Math.floor(segundosTotalesLocales / 60);
         document.getElementById('lbl-tiempo-sesion').textContent = `⏱ Tiempo en sala: ${mins} min`;
       }, 1000);
@@ -440,30 +446,45 @@
     function cicloHeartbeat() {
       if (!sesionActiva) return;
       enviarHeartbeat(false);
-      const siguienteIntervalo = Math.floor(240000 + Math.random() * 180000);
+      // Siguiente envío escalonado aleatoriamente entre 10 y 15 minutos
+      const siguienteIntervalo = Math.floor(600000 + Math.random() * 300000);
       timeoutHeartbeat = setTimeout(cicloHeartbeat, siguienteIntervalo);
     }
 
     function enviarHeartbeat(usarBeacon) {
-      if (!sesionActiva || segundosPendientes < 5) return;
+      if (!sesionActiva || segundosPendientes < 10) return;
+      const usuarioActual = sesionActiva.usuario;
+      const claveRespaldo = `usjt_pendiente_${usuarioActual}`;
       const envio = segundosPendientes;
+
       segundosPendientes = 0;
+      localStorage.setItem(claveRespaldo, 0);
 
       const payload = JSON.stringify({
         accion: 'heartbeat',
-        usuario: sesionActiva.usuario,
+        usuario: usuarioActual,
         segundos: envio
       });
 
       if (usarBeacon && navigator.sendBeacon) {
-        navigator.sendBeacon(API_URL, payload);
+        const enviado = navigator.sendBeacon(API_URL, payload);
+        if (!enviado) {
+          segundosPendientes += envio;
+          localStorage.setItem(claveRespaldo, segundosPendientes);
+        }
       } else {
         fetch(API_URL, { method: 'POST', body: payload })
           .then(r => r.json())
           .then(res => {
-            if (res && res.retry) segundosPendientes += envio;
+            if (res && res.retry) {
+              segundosPendientes += envio;
+              localStorage.setItem(claveRespaldo, segundosPendientes);
+            }
           })
-          .catch(() => { segundosPendientes += envio; });
+          .catch(() => {
+            segundosPendientes += envio;
+            localStorage.setItem(claveRespaldo, segundosPendientes);
+          });
       }
     }
 
