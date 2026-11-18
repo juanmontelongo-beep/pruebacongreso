@@ -49,14 +49,20 @@
     .btn-salir-top { display: none; border-color: #FCA5A5; color: #FECACA; }
     .btn-salir-top:hover { background: #991B1B; border-color: #991B1B; color: #FFF; }
 
-    /* VISTA PORTAL DE INICIO ENSANCHADA */
+    /* VISTA PORTAL DE INICIO CON ALTURA UNIFORME ENTRE COLUMNAS */
     #portal-view {
       flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 24px 18px;
       background: radial-gradient(circle at top right, rgba(188, 149, 92, 0.14), transparent 50%),
                   radial-gradient(circle at bottom left, rgba(105, 28, 50, 0.09), transparent 50%);
       overflow-y: auto;
     }
-    .portal-grid { max-width: 1240px; width: 100%; margin: auto; display: grid; grid-template-columns: 1.38fr 0.62fr; gap: 36px; align-items: center; }
+    .portal-grid {
+      max-width: 1240px; width: 100%; margin: auto; display: grid;
+      grid-template-columns: 1.38fr 0.62fr; gap: 32px; align-items: stretch;
+    }
+    .event-info {
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
 
     /* BLOQUE PROTAGONISTA DEL LOGO DEL CONGRESO EN GRANDE */
     .hero-congreso {
@@ -82,10 +88,10 @@
     .hero-texto .lema { font-size: 14px; font-style: italic; font-weight: 600; color: #8A6B3E; margin-bottom: 8px; }
     .hero-texto p { font-size: 13.5px; color: var(--texto-gris); line-height: 1.5; }
 
-    /* RECUADRO INSTITUCIONES CONVOCANTES MÁS AMPLIO Y CON FONDO BLANCO PARA PNG TRANSPARENTES */
+    /* RECUADRO INSTITUCIONES CONVOCANTES */
     .instituciones-strip {
       background: #FFFFFF; border-radius: 14px; padding: 18px 24px; border: 1.5px solid var(--oro);
-      margin-bottom: 20px; box-shadow: 0 4px 16px rgba(56, 10, 23, 0.06);
+      box-shadow: 0 4px 16px rgba(56, 10, 23, 0.06);
     }
     .instituciones-label {
       font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
@@ -98,22 +104,30 @@
       height: 64px; width: auto; max-width: 215px; object-fit: contain; display: block;
     }
 
-    .portal-cta-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    /* FILA INFERIOR DE REGISTRO Y FECHA */
+    .portal-cta-row {
+      max-width: 1240px; width: 100%; margin: 18px auto 0;
+      display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    }
     .btn-secundario {
       display: inline-block; background: var(--oro-crema); color: var(--guinda); border: 1.5px solid var(--oro);
       padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
     }
     .btn-secundario:hover { background: var(--oro); color: var(--fondo-oscuro); }
 
-    /* TARJETA LOGIN + ICONO OJITO */
-    .login-card { background: #FFFFFF; border-radius: 14px; padding: 34px 28px; box-shadow: 0 12px 32px rgba(56, 10, 23, 0.12); border-top: 5px solid var(--guinda); }
-    .login-card h3 { font-size: 20px; font-weight: 700; color: var(--guinda-oscuro); margin-bottom: 6px; }
-    .login-card .sub { font-size: 13px; color: var(--texto-gris); margin-bottom: 22px; }
+    /* TARJETA LOGIN CON MISMA ALTURA QUE LOS DOS BLOQUES DE LA IZQUIERDA */
+    .login-card {
+      background: #FFFFFF; border-radius: 14px; padding: 32px 28px;
+      box-shadow: 0 12px 32px rgba(56, 10, 23, 0.12); border-top: 5px solid var(--guinda);
+      display: flex; flex-direction: column; justify-content: center; height: 100%;
+    }
+    .login-card h3 { font-size: 21px; font-weight: 700; color: var(--guinda-oscuro); margin-bottom: 6px; }
+    .login-card .sub { font-size: 13.5px; color: var(--texto-gris); margin-bottom: 24px; }
 
-    .form-group { margin-bottom: 16px; }
+    .form-group { margin-bottom: 18px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--texto-oscuro); margin-bottom: 6px; }
     .input-wrap { position: relative; display: flex; align-items: center; }
-    .form-group input { width: 100%; padding: 12px 42px 12px 14px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-size: 14px; }
+    .form-group input { width: 100%; padding: 13px 42px 13px 14px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-size: 14px; }
     .form-group input:focus { outline: none; border-color: var(--guinda); }
     .toggle-pass {
       position: absolute; right: 10px; background: none; border: none; color: var(--texto-gris);
@@ -122,8 +136,8 @@
     .toggle-pass:hover { color: var(--guinda); }
 
     .btn-ingresar {
-      width: 100%; padding: 13px; background: linear-gradient(135deg, var(--guinda) 0%, var(--guinda-oscuro) 100%);
-      color: #FFFFFF; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer;
+      width: 100%; padding: 14px; background: linear-gradient(135deg, var(--guinda) 0%, var(--guinda-oscuro) 100%);
+      color: #FFFFFF; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px;
     }
     .btn-ingresar:hover { background: linear-gradient(135deg, var(--guinda-claro) 0%, var(--guinda) 100%); }
     .btn-ingresar:disabled { opacity: 0.65; cursor: not-allowed; }
@@ -131,7 +145,7 @@
     #error-msg { display: none; margin-top: 14px; padding: 10px 12px; background: var(--error-bg); color: var(--error-txt); border-radius: 6px; font-size: 13px; font-weight: 500; text-align: center; }
 
     .portal-footer-logos {
-      max-width: 1240px; width: 100%; margin: 20px auto 0; padding-top: 12px; border-top: 1px solid #E2E8F0;
+      max-width: 1240px; width: 100%; margin: 18px auto 0; padding-top: 12px; border-top: 1px solid #E2E8F0;
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--texto-gris);
     }
 
@@ -161,19 +175,40 @@
       flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: row;
     }
     #video-wrapper { flex: 1; min-width: 0; min-height: 0; background: #000; position: relative; }
-    #chat-wrapper { width: 380px; flex-shrink: 0; min-height: 0; border-left: 2px solid var(--guinda); background: #14070D; position: relative; display: flex; flex-direction: column; }
     #video-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+
+    /* CONTENEDOR DE CHAT CON CUBIERTA INFERIOR PARA EVITAR SALIDA DE LA PLATAFORMA */
+    #chat-wrapper {
+      width: 380px; flex-shrink: 0; min-height: 0; border-left: 2px solid var(--guinda);
+      background: #0F0F0F; position: relative; display: flex; flex-direction: column; overflow: hidden;
+    }
     .chat-topbar {
-      background: #1E0A14; padding: 6px 12px; border-bottom: 1px solid var(--guinda);
-      display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+      background: #1E0A14; padding: 8px 14px; border-bottom: 1px solid var(--guinda);
+      display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 5;
     }
-    .chat-topbar span { font-size: 11.5px; color: var(--oro-suave); font-weight: 600; }
-    .btn-popout {
-      background: var(--guinda); color: var(--oro-crema); border: 1px solid var(--oro);
-      border-radius: 4px; padding: 3px 9px; font-size: 11px; font-weight: 600; cursor: pointer;
-    }
-    .btn-popout:hover { background: var(--oro); color: var(--fondo-oscuro); }
+    .chat-topbar span { font-size: 12px; color: var(--oro-suave); font-weight: 600; }
     #yt-chat { flex: 1; width: 100%; border: none; }
+    
+    /* FRANJA INFERIOR SUPERPUESTA SOBRE "ACCEDE PARA CHATEAR" DE YOUTUBE */
+    .chat-bottom-cover {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 92px;
+      background: linear-gradient(180deg, #16070E 0%, #1E0A14 100%);
+      border-top: 1.5px solid var(--oro);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 10px 16px; gap: 6px; z-index: 10;
+    }
+    .btn-chat-comentar {
+      width: 100%; background: linear-gradient(135deg, var(--guinda) 0%, var(--guinda-oscuro) 100%);
+      color: var(--oro-crema); border: 1.5px solid var(--oro); border-radius: 22px;
+      padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
+    }
+    .btn-chat-comentar:hover {
+      background: var(--oro); color: var(--fondo-oscuro);
+    }
+    .chat-bottom-hint {
+      font-size: 11px; color: #CBD5E1; text-align: center;
+    }
 
     /* MODALES */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30, 10, 20, 0.78); z-index: 50; justify-content: center; align-items: center; padding: 20px; }
@@ -201,7 +236,7 @@
       #stream-view { height: auto; }
       .stream-stage { flex-direction: column; }
       #video-wrapper { width: 100%; aspect-ratio: 16 / 9; min-height: 230px; max-height: 55vh; }
-      #chat-wrapper { width: 100%; height: 440px; min-height: 440px; border-left: none; border-top: 2px solid var(--guinda); }
+      #chat-wrapper { width: 100%; height: 460px; min-height: 460px; border-left: none; border-top: 2px solid var(--guinda); }
     }
   </style>
 </head>
@@ -243,7 +278,7 @@
           </div>
         </div>
 
-        <!-- CINTILLA DE INSTITUCIONES CONVOCANTES (LOGOS TRANSPARENTES .PNG MÁS GRANDES) -->
+        <!-- CINTILLA DE INSTITUCIONES CONVOCANTES -->
         <div class="instituciones-strip">
           <span class="instituciones-label">INSTITUCIONES CONVOCANTES</span>
           <div class="instituciones-logos">
@@ -252,11 +287,6 @@
             <img src="img/inst2.png" alt="Universidad Nacional Autónoma de México" onerror="this.style.display='none'">
             <img src="img/inst3.png" alt="SUEDDSI" onerror="this.style.display='none'">
           </div>
-        </div>
-
-        <div class="portal-cta-row">
-          <button type="button" class="btn-secundario" onclick="abrirModalRegistro()">¿Aún no tienes clave? Regístrate aquí</button>
-          <span style="font-size: 13px; color: var(--texto-gris); font-weight: 600;">Del 23 al 26 de noviembre de 2026 • Modalidad Híbrida</span>
         </div>
       </section>
 
@@ -282,6 +312,11 @@
         <button type="button" class="btn-ingresar" id="btn-entrar" onclick="iniciarSesion()">Entrar a la Transmisión</button>
         <div id="error-msg"></div>
       </section>
+    </div>
+
+    <div class="portal-cta-row">
+      <button type="button" class="btn-secundario" onclick="abrirModalRegistro()">¿Aún no tienes clave? Regístrate aquí</button>
+      <span style="font-size: 13px; color: var(--texto-gris); font-weight: 600;">Del 23 al 26 de noviembre de 2026 • Modalidad Híbrida</span>
     </div>
 
     <div class="portal-footer-logos">
@@ -313,10 +348,13 @@
       </div>
       <div id="chat-wrapper">
         <div class="chat-topbar">
-          <span>Chat de la Conferencia</span>
-          <button type="button" class="btn-popout" onclick="abrirChatPopout()" title="Abre el chat con tu sesión de Google sin salir de la sala">↗ Abrir para comentar</button>
+          <span>Chat de la Conferencia en Vivo</span>
         </div>
         <iframe id="yt-chat" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <div class="chat-bottom-cover">
+          <button type="button" class="btn-chat-comentar" onclick="abrirChatPopout()">💬 Abrir chat para comentar</button>
+          <span class="chat-bottom-hint">Se abrirá en ventana aparte sin salir de la transmisión</span>
+        </div>
       </div>
     </div>
   </section>
