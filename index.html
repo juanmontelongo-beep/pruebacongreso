@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula Virtual y Transmisiones en Vivo | USJT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --guinda: #691C32; --guinda-claro: #8B2645; --guinda-oscuro: #4B1122;
+      --oro: #BC955C; --oro-suave: #F5EDD8; --oro-crema: #FFF7E6;
+      --fondo-oscuro: #1E0A14; --fondo-claro: #F8FAFC;
+      --texto-oscuro: #1E293B; --texto-gris: #64748B;
+      --error-bg: #FEE2E2; --error-txt: #991B1B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    html, body { height: 100%; background-color: var(--fondo-claro); color: var(--texto-oscuro); }
+    body { display: flex; flex-direction: column; }
+
+    header {
+      background: linear-gradient(90deg, var(--fondo-oscuro) 0%, var(--guinda) 100%);
+      color: #FFFFFF; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 3px solid var(--oro); box-shadow: 0 4px 12px rgba(56, 10, 23, 0.25); z-index: 10; flex-shrink: 0;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-badge { background: var(--oro); color: var(--fondo-oscuro); font-weight: 700; padding: 6px 12px; border-radius: 6px; font-size: 14px; }
+    .brand-title h1 { font-size: 17px; font-weight: 700; }
+    .brand-title span { font-size: 12px; color: var(--oro-suave); display: block; }
+
+    .btn-registro-top {
+      background: transparent; border: 1.5px solid var(--oro); color: var(--oro-crema);
+      padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .btn-registro-top:hover { background: var(--oro); color: var(--fondo-oscuro); }
+
+    #portal-view {
+      flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px 20px;
+      background: radial-gradient(circle at top right, rgba(188, 149, 92, 0.12), transparent 50%),
+                  radial-gradient(circle at bottom left, rgba(105, 28, 50, 0.08), transparent 50%);
+    }
+    .portal-grid { max-width: 1040px; width: 100%; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; align-items: center; }
+
+    .tag-vivo {
+      display: inline-flex; align-items: center; gap: 8px; background: var(--oro-suave); color: var(--guinda);
+      font-weight: 700; font-size: 12px; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--oro); margin-bottom: 18px;
+    }
+    .dot-pulse { width: 8px; height: 8px; background: var(--guinda); border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .event-info h2 { font-size: 32px; color: var(--guinda-oscuro); line-height: 1.2; margin-bottom: 16px; }
+    .event-info p { font-size: 15px; color: var(--texto-gris); line-height: 1.6; margin-bottom: 24px; }
+
+    .event-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 28px; }
+    .meta-card { background: #FFFFFF; border-left: 4px solid var(--oro); padding: 12px 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .meta-card strong { display: block; font-size: 12px; color: var(--guinda); text-transform: uppercase; margin-bottom: 2px; }
+    .meta-card span { font-size: 14px; font-weight: 500; color: var(--texto-oscuro); }
+
+    .btn-secundario {
+      display: inline-block; background: var(--oro-crema); color: var(--guinda); border: 1px solid var(--oro);
+      padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
+    }
+    .btn-secundario:hover { background: var(--oro); color: var(--fondo-oscuro); }
+
+    .login-card { background: #FFFFFF; border-radius: 14px; padding: 36px 32px; box-shadow: 0 12px 32px rgba(56, 10, 23, 0.12); border-top: 5px solid var(--guinda); }
+    .login-card h3 { font-size: 20px; color: var(--guinda-oscuro); margin-bottom: 6px; }
+    .login-card .sub { font-size: 13px; color: var(--texto-gris); margin-bottom: 22px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--texto-oscuro); margin-bottom: 6px; }
+    .form-group input { width: 100%; padding: 12px 14px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-size: 14px; }
+    .form-group input:focus { outline: none; border-color: var(--guinda); }
+
+    .btn-ingresar {
+      width: 100%; padding: 13px; background: linear-gradient(135deg, var(--guinda) 0%, var(--guinda-oscuro) 100%);
+      color: #FFFFFF; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer;
+    }
+    .btn-ingresar:hover { background: linear-gradient(135deg, var(--guinda-claro) 0%, var(--guinda) 100%); }
+    .btn-ingresar:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    #error-msg { display: none; margin-top: 14px; padding: 10px 12px; background: var(--error-bg); color: var(--error-txt); border-radius: 6px; font-size: 13px; font-weight: 500; text-align: center; }
+
+    #stream-view { display: none; flex: 1; width: 100%; min-height: calc(100vh - 68px); background: var(--fondo-oscuro); flex-direction: row; }
+    #video-wrapper { flex: 1; min-width: 0; min-height: calc(100vh - 68px); background: #000; position: relative; }
+    #chat-wrapper { width: 380px; flex-shrink: 0; min-height: calc(100vh - 68px); border-left: 2px solid var(--guinda); background: #14070D; position: relative; }
+    #video-wrapper iframe, #chat-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+
+    #modal-registro { display: none; position: fixed; inset: 0; background: rgba(30, 10, 20, 0.75); z-index: 50; justify-content: center; align-items: center; padding: 20px; }
+    .modal-content { background: #FFFFFF; width: 100%; max-width: 680px; height: 85vh; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; border-top: 5px solid var(--oro); }
+    .modal-header { background: var(--guinda); color: #FFF; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .close-modal { background: none; border: none; color: var(--oro-crema); font-size: 24px; cursor: pointer; line-height: 1; }
+    .modal-body { flex: 1; }
+    .modal-body iframe { width: 100%; height: 100%; border: none; }
+
+    @media (max-width: 1024px) {
+      .portal-grid { grid-template-columns: 1fr; gap: 24px; }
+      #stream-view { flex-direction: column; min-height: auto; }
+      #video-wrapper { width: 100%; aspect-ratio: 16 / 9; min-height: 240px; max-height: 60vh; }
+      #chat-wrapper { width: 100%; height: 420px; min-height: 420px; border-left: none; border-top: 2px solid var(--guinda); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-badge">USJT</div>
+      <div class="brand-title">
+        <h1>Aula Virtual y Transmisiones en Vivo</h1>
+        <span>Plataforma Institucional de Educación Continua</span>
+      </div>
+    </div>
+    <button type="button" class="btn-registro-top" id="btn-header-reg" onclick="abrirModalRegistro()">Obtener Acceso / Registro</button>
+  </header>
+
+  <main id="portal-view">
+    <div class="portal-grid">
+      <section class="event-info">
+        <div class="tag-vivo"><span class="dot-pulse"></span> TRANSMISIÓN EN DIRECTO</div>
+        <h2>Conferencia Magistral y Clase Sincrónica</h2>
+        <p>Bienvenido a la sala oficial de transmisión. Para ingresar al aula y participar en el chat en tiempo real, utiliza el usuario y contraseña enviados a tu correo electrónico tras completar tu registro.</p>
+        <div class="event-meta">
+          <div class="meta-card">
+            <strong>Modalidad</strong>
+            <span>En vivo (Streaming + Chat)</span>
+          </div>
+          <div class="meta-card">
+            <strong>Acceso</strong>
+            <span>Exclusivo con credencial</span>
+          </div>
+        </div>
+        <button type="button" class="btn-secundario" onclick="abrirModalRegistro()">¿Aún no tienes clave? Regístrate aquí</button>
+      </section>
+
+      <section class="login-card">
+        <h3>Ingreso a la Sala</h3>
+        <p class="sub">Introduce tus credenciales asignadas</p>
+        <div class="form-group">
+          <label for="usuario">Usuario</label>
+          <input type="text" id="usuario" placeholder="Ej. juan.perez42">
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" placeholder="••••••••">
+        </div>
+        <button type="button" class="btn-ingresar" id="btn-entrar" onclick="iniciarSesion()">Entrar a la Transmisión</button>
+        <div id="error-msg"></div>
+      </section>
+    </div>
+  </main>
+
+  <section id="stream-view">
+    <div id="video-wrapper">
+      <iframe id="yt-video" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div id="chat-wrapper">
+      <iframe id="yt-chat" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    </div>
+  </section>
+
+  <div id="modal-registro">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>Registro de Asistencia — USJT</h4>
+        <button type="button" class="close-modal" onclick="cerrarModalRegistro()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- RECUERDA ACTUALIZAR ESTE SRC SI CAMBIASTE DE GOOGLE FORM EN LA NUEVA CUENTA -->
+        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLScqgKjQ_CxEVJx7duFm2iHYn61LEt4e4vC_7BFZvUDYE3izUA/viewform?embedded=true">Cargando formulario...</iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxhLsSSXFAZiSiN8vX_SsPOYezKbCayEPf_1ReVide35H2NDxFI2NUI3_mpb7pfAKXcGQ/exec';
+
+    document.getElementById('password').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') iniciarSesion();
+    });
+
+    function abrirModalRegistro() {
+      document.getElementById('modal-registro').style.display = 'flex';
+    }
+
+    function cerrarModalRegistro() {
+      document.getElementById('modal-registro').style.display = 'none';
+    }
+
+    function iniciarSesion() {
+      const user = document.getElementById('usuario').value;
+      const pass = document.getElementById('password').value;
+      const btn = document.getElementById('btn-entrar');
+      const errorDiv = document.getElementById('error-msg');
+
+      if (!user || !pass) {
+        mostrarError('Por favor ingresa tu usuario y contraseña.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Verificando credenciales...';
+      errorDiv.style.display = 'none';
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ usuario: user, password: pass })
+      })
+      .then(response => response.json())
+      .then(res => {
+        if (res.autorizado) {
+          cargarTransmision(res.videoId);
+        } else {
+          mostrarError(res.mensaje);
+          btn.disabled = false;
+          btn.textContent = 'Entrar a la Transmisión';
+        }
+      })
+      .catch(() => {
+        mostrarError('Error de conexión con la base de datos. Verifica tu conexión.');
+        btn.disabled = false;
+        btn.textContent = 'Entrar a la Transmisión';
+      });
+    }
+
+    function mostrarError(texto) {
+      const errorDiv = document.getElementById('error-msg');
+      errorDiv.textContent = texto;
+      errorDiv.style.display = 'block';
+    }
+
+    function cargarTransmision(videoId) {
+      document.getElementById('portal-view').style.display = 'none';
+      document.getElementById('btn-header-reg').style.display = 'none';
+      document.getElementById('stream-view').style.display = 'flex';
+
+      const dominioActual = window.location.hostname;
+
+      const ytVideo = document.getElementById('yt-video');
+      ytVideo.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&origin=https://${dominioActual}`;
+
+      const ytChat = document.getElementById('yt-chat');
+      ytChat.src = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${dominioActual}&dark_theme=1`;
+    }
+  </script>
+</body>
+</html>
