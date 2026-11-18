@@ -49,24 +49,24 @@
     .btn-salir-top { display: none; border-color: #FCA5A5; color: #FECACA; }
     .btn-salir-top:hover { background: #991B1B; border-color: #991B1B; color: #FFF; }
 
-    /* VISTA PORTAL DE INICIO */
+    /* VISTA PORTAL DE INICIO ENSANCHADA */
     #portal-view {
-      flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 28px 24px 18px;
+      flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 24px 18px;
       background: radial-gradient(circle at top right, rgba(188, 149, 92, 0.14), transparent 50%),
                   radial-gradient(circle at bottom left, rgba(105, 28, 50, 0.09), transparent 50%);
       overflow-y: auto;
     }
-    .portal-grid { max-width: 1140px; width: 100%; margin: auto; display: grid; grid-template-columns: 1.22fr 0.78fr; gap: 38px; align-items: center; }
+    .portal-grid { max-width: 1240px; width: 100%; margin: auto; display: grid; grid-template-columns: 1.38fr 0.62fr; gap: 36px; align-items: center; }
 
     /* BLOQUE PROTAGONISTA DEL LOGO DEL CONGRESO EN GRANDE */
     .hero-congreso {
       display: flex; align-items: center; gap: 24px; margin-bottom: 18px;
-      background: #FFFFFF; padding: 20px; border-radius: 14px;
+      background: #FFFFFF; padding: 22px; border-radius: 14px;
       border: 1px solid #E2E8F0; border-left: 5px solid var(--guinda);
       box-shadow: 0 6px 20px rgba(56, 10, 23, 0.06);
     }
     .congreso-logo-grande {
-      flex-shrink: 0; width: 195px; height: 195px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; width: 205px; height: 205px; display: flex; align-items: center; justify-content: center;
       background: #F4F4F6; border-radius: 12px; padding: 10px; border: 1px solid #E2E8F0;
     }
     .congreso-logo-grande img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
@@ -78,29 +78,25 @@
     .dot-pulse { width: 8px; height: 8px; background: var(--guinda); border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    .hero-texto h2 { font-size: 24px; font-weight: 700; color: var(--guinda-oscuro); line-height: 1.22; margin-bottom: 8px; }
-    .hero-texto .lema { font-size: 13.5px; font-style: italic; font-weight: 600; color: #8A6B3E; margin-bottom: 8px; }
+    .hero-texto h2 { font-size: 25px; font-weight: 700; color: var(--guinda-oscuro); line-height: 1.22; margin-bottom: 8px; }
+    .hero-texto .lema { font-size: 14px; font-style: italic; font-weight: 600; color: #8A6B3E; margin-bottom: 8px; }
     .hero-texto p { font-size: 13.5px; color: var(--texto-gris); line-height: 1.5; }
 
-    /* CINTILLA DE LAS 4 INSTITUCIONES CONVOCANTES */
+    /* RECUADRO INSTITUCIONES CONVOCANTES MÁS AMPLIO Y CON FONDO BLANCO PARA PNG TRANSPARENTES */
     .instituciones-strip {
-      background: #0B0508; border-radius: 12px; padding: 14px 18px; border: 1.5px solid var(--oro);
-      margin-bottom: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+      background: #FFFFFF; border-radius: 14px; padding: 18px 24px; border: 1.5px solid var(--oro);
+      margin-bottom: 20px; box-shadow: 0 4px 16px rgba(56, 10, 23, 0.06);
     }
     .instituciones-label {
-      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px;
-      color: var(--oro-suave); margin-bottom: 12px; display: block;
+      font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--guinda); margin-bottom: 14px; display: block;
     }
     .instituciones-logos {
-      display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
     }
     .instituciones-logos img {
-      height: 46px; width: auto; max-width: 175px; object-fit: contain; display: block;
+      height: 64px; width: auto; max-width: 215px; object-fit: contain; display: block;
     }
-    .logo-claro-badge {
-      background: #FFFFFF; padding: 4px 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
-    }
-    .logo-claro-badge img { height: 42px; width: auto; }
 
     .portal-cta-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
     .btn-secundario {
@@ -110,7 +106,7 @@
     .btn-secundario:hover { background: var(--oro); color: var(--fondo-oscuro); }
 
     /* TARJETA LOGIN + ICONO OJITO */
-    .login-card { background: #FFFFFF; border-radius: 14px; padding: 34px 30px; box-shadow: 0 12px 32px rgba(56, 10, 23, 0.12); border-top: 5px solid var(--guinda); }
+    .login-card { background: #FFFFFF; border-radius: 14px; padding: 34px 28px; box-shadow: 0 12px 32px rgba(56, 10, 23, 0.12); border-top: 5px solid var(--guinda); }
     .login-card h3 { font-size: 20px; font-weight: 700; color: var(--guinda-oscuro); margin-bottom: 6px; }
     .login-card .sub { font-size: 13px; color: var(--texto-gris); margin-bottom: 22px; }
 
@@ -135,7 +131,7 @@
     #error-msg { display: none; margin-top: 14px; padding: 10px 12px; background: var(--error-bg); color: var(--error-txt); border-radius: 6px; font-size: 13px; font-weight: 500; text-align: center; }
 
     .portal-footer-logos {
-      max-width: 1140px; width: 100%; margin: 20px auto 0; padding-top: 12px; border-top: 1px solid #E2E8F0;
+      max-width: 1240px; width: 100%; margin: 20px auto 0; padding-top: 12px; border-top: 1px solid #E2E8F0;
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--texto-gris);
     }
 
@@ -144,7 +140,7 @@
       display: none; flex: 1; min-height: 0; width: 100%; background: var(--fondo-oscuro); flex-direction: column;
     }
     .stream-subbar {
-      background: #12060C; border-bottom: 1.5px solid rgba(188, 149, 92, 0.45); padding: 7px 24px;
+      background: #1E0A14; border-bottom: 1.5px solid rgba(188, 149, 92, 0.45); padding: 7px 24px;
       display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-shrink: 0; flex-wrap: wrap;
     }
     .subbar-info { display: flex; align-items: center; gap: 10px; color: #FFF; }
@@ -152,16 +148,11 @@
     .subbar-title { font-size: 13px; font-weight: 600; color: var(--oro-crema); }
     
     .subbar-logos { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .subbar-logo-dark {
-      background: #000000; padding: 3px 7px; border-radius: 5px; height: 32px; border: 1px solid rgba(188,149,92,0.3);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .subbar-logo-dark img { max-height: 24px; width: auto; display: block; }
     .subbar-logo-light {
-      background: #FFFFFF; padding: 3px 7px; border-radius: 5px; height: 32px;
+      background: #FFFFFF; padding: 3px 8px; border-radius: 5px; height: 34px; border: 1px solid rgba(188,149,92,0.4);
       display: flex; align-items: center; justify-content: center;
     }
-    .subbar-logo-light img { max-height: 24px; width: auto; display: block; }
+    .subbar-logo-light img { max-height: 26px; width: auto; display: block; }
     .timer-badge {
       font-size: 12px; font-weight: 600; color: var(--oro-suave); background: rgba(105, 28, 50, 0.55); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(188,149,92,0.45);
     }
@@ -206,6 +197,7 @@
       .hero-congreso { flex-direction: column; text-align: center; }
       .congreso-logo-grande { width: 170px; height: 170px; }
       .instituciones-logos { justify-content: center; }
+      .instituciones-logos img { height: 52px; max-width: 165px; }
       #stream-view { height: auto; }
       .stream-stage { flex-direction: column; }
       #video-wrapper { width: 100%; aspect-ratio: 16 / 9; min-height: 230px; max-height: 55vh; }
@@ -251,22 +243,20 @@
           </div>
         </div>
 
-        <!-- CINTILLA DE INSTITUCIONES CONVOCANTES -->
+        <!-- CINTILLA DE INSTITUCIONES CONVOCANTES (LOGOS TRANSPARENTES .PNG MÁS GRANDES) -->
         <div class="instituciones-strip">
           <span class="instituciones-label">INSTITUCIONES CONVOCANTES</span>
           <div class="instituciones-logos">
-            <img src="img/inst1.jpg" alt="Tamaulipas Gobierno del Estado" onerror="this.style.display='none'">
-            <img src="img/inst4.jpg" alt="Secretaría de Seguridad Pública" onerror="this.style.display='none'">
-            <img src="img/inst2.jpg" alt="Universidad Nacional Autónoma de México" onerror="this.style.display='none'">
-            <div class="logo-claro-badge">
-              <img src="img/inst3.png" alt="SUEDDSI" onerror="this.parentElement.style.display='none'">
-            </div>
+            <img src="img/inst1.png" alt="Tamaulipas Gobierno del Estado" onerror="this.style.display='none'">
+            <img src="img/inst4.png" alt="Secretaría de Seguridad Pública" onerror="this.style.display='none'">
+            <img src="img/inst2.png" alt="Universidad Nacional Autónoma de México" onerror="this.style.display='none'">
+            <img src="img/inst3.png" alt="SUEDDSI" onerror="this.style.display='none'">
           </div>
         </div>
 
         <div class="portal-cta-row">
           <button type="button" class="btn-secundario" onclick="abrirModalRegistro()">¿Aún no tienes clave? Regístrate aquí</button>
-          <span style="font-size: 12.5px; color: var(--texto-gris); font-weight: 500;">Del 23 al 26 de noviembre de 2026 • Modalidad Híbrida</span>
+          <span style="font-size: 13px; color: var(--texto-gris); font-weight: 600;">Del 23 al 26 de noviembre de 2026 • Modalidad Híbrida</span>
         </div>
       </section>
 
@@ -310,9 +300,9 @@
       <div class="subbar-logos">
         <span class="timer-badge" id="lbl-tiempo-sesion">⏱ Tiempo en sala: 0 min</span>
         <div class="subbar-logo-light"><img src="img/congreso.png" alt="Congreso" onerror="this.parentElement.style.display='none'"></div>
-        <div class="subbar-logo-dark"><img src="img/inst1.jpg" alt="Tamaulipas" onerror="this.parentElement.style.display='none'"></div>
-        <div class="subbar-logo-dark"><img src="img/inst4.jpg" alt="SSP" onerror="this.parentElement.style.display='none'"></div>
-        <div class="subbar-logo-dark"><img src="img/inst2.jpg" alt="UNAM" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-light"><img src="img/inst1.png" alt="Tamaulipas" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-light"><img src="img/inst4.png" alt="SSP" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-light"><img src="img/inst2.png" alt="UNAM" onerror="this.parentElement.style.display='none'"></div>
         <div class="subbar-logo-light"><img src="img/inst3.png" alt="SUEDDSI" onerror="this.parentElement.style.display='none'"></div>
       </div>
     </div>
