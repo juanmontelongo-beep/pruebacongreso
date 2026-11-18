@@ -353,7 +353,7 @@
         <iframe id="yt-chat" referrerpolicy="strict-origin-when-cross-origin"></iframe>
         <div class="chat-bottom-cover">
           <button type="button" class="btn-chat-comentar" onclick="abrirChatPopout()">💬 Abrir chat para comentar</button>
-          <span class="chat-bottom-hint">Se abrirá en ventana aparte sin salir de la transmisión</span>
+          <span class="chat-bottom-hint">Se abrirá encima de este panel sin salir de la transmisión</span>
         </div>
       </div>
     </div>
@@ -428,7 +428,1406 @@
       const srcChat = document.getElementById('yt-chat').src;
       if (!srcChat) return;
       const urlPopout = srcChat.split('&embed_domain')[0] + '&is_popout=1';
-      window.open(urlPopout, 'ChatCongresoUSJT', 'width=400,height=620,menubar=no,toolbar=no,location=no,status=no');
+
+      // Calcula la posición exacta del panel derecho del chat en el monitor
+      const chatBox = document.getElementById('chat-wrapper');
+      const rect = chatBox.getBoundingClientRect();
+      const winLeft = window.screenX !== undefined ? window.screenX : window.screenLeft;
+      const winTop = window.screenY !== undefined ? window.screenY : window.screenTop;
+      const barraSuperior = window.outerHeight - window.innerHeight;
+
+      const anchoPopout = Math.max(360, Math.round(rect.width));
+      const altoPopout = Math.max(520, Math.round(rect.height));
+      const posX = Math.max(0, Math.round(winLeft + rect.left));
+      const posY = Math.max(0, Math.round(winTop + barraSuperior + rect.top));
+
+      window.open(
+        urlPopout,
+        'ChatCongresoUSJT',
+        `width=${anchoPopout},height=${altoPopout},left=${posX},top=${posY},menubar=no,toolbar=no,location=no,status=no`
+      );
+    }
+
+    function iniciarSesion() {
+      const user = document.getElementById('usuario').value;
+      const pass = document.getElementById('password').value;
+      const btn = document.getElementById('btn-entrar');
+      const errorDiv = document.getElementById('error-msg');
+
+      if (!user || !pass) {
+        mostrarError('Por favor ingresa tu usuario y contraseña.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Verificando credenciales...';
+      errorDiv.style.display = 'none';
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ accion: 'login', usuario: user, password: pass })
+      })
+      .then(response => response.json())
+      .then(res => {
+        if (res.autorizado) {
+          sesionActiva = {
+            usuario: res.usuario,
+            nombre: res.nombre,
+            sesion: res.sesion,
+            minutosMinimos: res.minutosMinimos
+          };
+          cargarTransmision(res.videoId);
+        } else {
+          mostrarError(res.mensaje);
+          btn.disabled = false;
+          btn.textContent = 'Entrar a la Transmisión';
+        }
+      })
+      .catch(() => {
+        mostrarError('Error de conexión con la base de datos. Verifica tu red.');
+        btn.disabled = false;
+        btn.textContent = 'Entrar a la Transmisión';
+      });
+    }
+
+    function mostrarError(texto) {
+      const errorDiv = document.getElementById('error-msg');
+      errorDiv.textContent = texto;
+      errorDiv.style.display = 'block';
+    }
+
+    function cargarTransmision(videoId) {
+      document.getElementById('portal-view').style.display = 'none';
+      document.getElementById('btn-header-reg').style.display = 'none';
+      
+      document.getElementById('lbl-usuario-activo').textContent = sesionActiva.nombre;
+      document.getElementById('lbl-sesion-activa').textContent = sesionActiva.sesion;
+      document.getElementById('user-pill').style.display = 'inline-flex';
+      document.getElementById('btn-header-constancia').style.display = 'inline-block';
+      document.getElementById('btn-header-salir').style.display = 'inline-block';
+      document.getElementById('stream-view').style.display = 'flex';
+
+      const dominioActual = window.location.hostname;
+      document.getElementById('yt-video').src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&origin=https://${dominioActual}`;
+      document.getElementById('yt-chat').src = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${dominioActual}&dark_theme=1`;
+
+      iniciarConteoTiempo();
+    }
+
+    function cerrarSesion() {
+      enviarHeartbeat(true);
+      detenerConteoTiempo();
+      sesionActiva = null;
+
+      document.getElementById('yt-video').src = '';
+      document.getElementById('yt-chat').src = '';
+
+      document.getElementById('stream-view').style.display = 'none';
+      document.getElementById('user-pill').style.display = 'none';
+      document.getElementById('btn-header-constancia').style.display = 'none';
+      document.getElementById('btn-header-salir').style.display = 'none';
+
+      document.getElementById('portal-view').style.display = 'flex';
+      document.getElementById('btn-header-reg').style.display = 'inline-block';
+      const btn = document.getElementById('btn-entrar');
+      btn.disabled = false;
+      btn.textContent = 'Entrar a la Transmisión';
+    }
+
+    function iniciarConteoTiempo() {
+      const claveRespaldo = `usjt_pendiente_${sesionActiva.usuario}`;
+      segundosPendientes = Number(localStorage.getItem(claveRespaldo)) || 0;
+      segundosTotalesLocales = segundosPendientes;
+
+      const primerPulso = Math.floor(15000 + Math.random() * 45000);
+      timeoutHeartbeat = setTimeout(cicloHeartbeat, primerPulso);
+
+      intervaloContador = setInterval(() => {
+        if (!sesionActiva) return;
+        segundosPendientes++;
+        segundosTotalesLocales++;
+        localStorage.setItem(claveRespaldo, segundosPendientes);
+
+        const mins = Math.floor(segundosTotalesLocales / 60);
+        document.getElementById('lbl-tiempo-sesion').textContent = `⏱ Tiempo en sala: ${mins} min`;
+      }, 1000);
+    }
+
+    function cicloHeartbeat() {
+      if (!sesionActiva) return;
+      enviarHeartbeat(false);
+      const siguienteIntervalo = Math.floor(600000 + Math.random() * 300000);
+      timeoutHeartbeat = setTimeout(cicloHeartbeat, siguienteIntervalo);
+    }
+
+    function enviarHeartbeat(alSalir) {
+      if (!sesionActiva || segundosPendientes < 5) return;
+      const usuarioActual = sesionActiva.usuario;
+      const claveRespaldo = `usjt_pendiente_${usuarioActual}`;
+      const envio = segundosPendientes;
+
+      segundosPendientes = 0;
+      localStorage.setItem(claveRespaldo, 0);
+
+      const payload = JSON.stringify({
+        accion: 'heartbeat',
+        usuario: usuarioActual,
+        segundos: envio
+      });
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: payload,
+        keepalive: alSalir
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res && res.retry) {
+          segundosPendientes += envio;
+          localStorage.setItem(claveRespaldo, segundosPendientes);
+        }
+      })
+      .catch(() => {
+        segundosPendientes += envio;
+        localStorage.setItem(claveRespaldo, segundosPendientes);
+      });
+    }
+
+    function detenerConteoTiempo() {
+      clearInterval(intervaloContador);
+      clearTimeout(timeoutHeartbeat);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && sesionActiva) {
+        enviarHeartbeat(true);
+      }
+    });
+
+    function abrirModalConstancia() {
+      if (!sesionActiva) return;
+      enviarHeartbeat(false);
+      document.getElementById('modal-constancia').style.display = 'flex';
+      const statusEl = document.getElementById('constancia-status');
+      const detalleEl = document.getElementById('constancia-detalle');
+      const btnPdf = document.getElementById('btn-descargar-pdf');
+
+      statusEl.className = 'status-pill status-wait';
+      statusEl.textContent = 'Consultando registro...';
+      btnPdf.style.display = 'none';
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ accion: 'consultar_constancia', usuario: sesionActiva.usuario })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.cumple) {
+          statusEl.className = 'status-pill status-ok';
+          statusEl.textContent = `✓ Acreditado (${res.minutos} min registrados)`;
+          detalleEl.innerHTML = `Has cumplido el tiempo mínimo requerido (<strong>${res.requeridos} min</strong>) para <strong>${res.sesion}</strong>. Ya puedes descargar tu constancia.`;
+          btnPdf.style.display = 'inline-block';
+        } else {
+          statusEl.className = 'status-pill status-wait';
+          statusEl.textContent = `En progreso: ${res.minutos} / ${res.requeridos} min`;
+          detalleEl.innerHTML = `Permanece conectado en la sesión <strong>${res.sesion}</strong> hasta completar al menos <strong>${res.requeridos} minutos</strong> para habilitar la descarga.`;
+        }
+      })
+      .catch(() => {
+        statusEl.textContent = 'No se pudo consultar en este momento';
+      });
+    }
+
+    function generarPDFConstancia() {
+      if (!sesionActiva || !window.jspdf) return;
+      const { jsPDF } = window.jspdf;
+      const btnPdf = document.getElementById('btn-descargar-pdf');
+      
+      btnPdf.disabled = true;
+      btnPdf.textContent = 'Generando PDF institucional...';
+
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.src = 'img/plantilla.png?v=' + new Date().getTime();
+
+      img.onload = function() {
+        const esHorizontal = img.naturalWidth >= img.naturalHeight;
+        const doc = new jsPDF({
+          orientation: esHorizontal ? 'landscape' : 'portrait',
+          unit: 'mm',
+          format: 'letter'
+        });
+
+        const anchoPagina = doc.internal.pageSize.getWidth();
+        const altoPagina = doc.internal.pageSize.getHeight();
+        const centroX = anchoPagina / 2;
+
+        doc.addImage(img, 'PNG', 0, 0, anchoPagina, altoPagina, undefined, 'SLOW');
+
+        const posYNombre = altoPagina * 0.48;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.setTextColor(105, 28, 50);
+        doc.text(sesionActiva.nombre.toUpperCase(), centroX, posYNombre, { align: 'center', maxWidth: anchoPagina - 40 });
+
+        const folio = `USJT-CONGRESO-${sesionActiva.usuario.toUpperCase()}-2026`;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(90, 90, 90);
+        doc.text(`Folio de verificación: ${folio}`, centroX, altoPagina - 12, { align: 'center' });
+
+        doc.save(`Constancia_${sesionActiva.usuario}.pdf`);
+        btnPdf.disabled = false;
+        btnPdf.textContent = 'Descargar Constancia en PDF';
+      };
+
+      img.onerror = function() {
+        alert('No se encontró img/plantilla.png en el repositorio. Verifica que esté dentro de la carpeta img/.');
+        btnPdf.disabled = false;
+        btnPdf.textContent = 'Descargar Constancia en PDF';
+      };
+    }
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Congreso de Seguridad Pública | USJT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --guinda: #691C32; --guinda-claro: #8B2645; --guinda-oscuro: #4B1122;
+      --oro: #BC955C; --oro-suave: #F5EDD8; --oro-crema: #FFF7E6;
+      --fondo-oscuro: #1E0A14; --fondo-claro: #F8FAFC;
+      --texto-oscuro: #1E293B; --texto-gris: #64748B;
+      --error-bg: #FEE2E2; --error-txt: #991B1B;
+      --ok-bg: #DCFCE7; --ok-txt: #166534;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Encode Sans', sans-serif; }
+    html, body { height: 100%; background-color: var(--fondo-claro); color: var(--texto-oscuro); }
+    body { display: flex; flex-direction: column; }
+
+    /* CINTILLA SUPERIOR AMPLIADA */
+    header {
+      background: linear-gradient(90deg, var(--fondo-oscuro) 0%, var(--guinda) 100%);
+      color: #FFFFFF; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 4px solid var(--oro); box-shadow: 0 4px 14px rgba(56, 10, 23, 0.28); z-index: 20; flex-shrink: 0; gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 16px; }
+    .brand-logo-box {
+      background: #FFFFFF; padding: 6px 14px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; height: 54px; border: 1.5px solid var(--oro);
+    }
+    .brand-logo-box img { max-height: 42px; width: auto; display: block; }
+    .brand-title h1 { font-size: 18.5px; font-weight: 700; letter-spacing: -0.2px; }
+    .brand-title span { font-size: 12.5px; color: var(--oro-suave); display: block; margin-top: 2px; font-weight: 500; }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .user-pill {
+      display: none; align-items: center; gap: 8px; background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(188, 149, 92, 0.5); padding: 7px 14px; border-radius: 20px; font-size: 12.5px; color: var(--oro-crema);
+    }
+    .btn-registro-top, .btn-salir-top, .btn-constancia-top {
+      background: transparent; border: 1.5px solid var(--oro); color: var(--oro-crema);
+      padding: 9px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .btn-registro-top:hover { background: var(--oro); color: var(--fondo-oscuro); }
+    .btn-constancia-top { display: none; background: var(--oro); color: var(--fondo-oscuro); }
+    .btn-constancia-top:hover { background: var(--oro-crema); }
+    .btn-salir-top { display: none; border-color: #FCA5A5; color: #FECACA; }
+    .btn-salir-top:hover { background: #991B1B; border-color: #991B1B; color: #FFF; }
+
+    /* VISTA PORTAL DE INICIO CON ALTURA UNIFORME ENTRE COLUMNAS */
+    #portal-view {
+      flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 24px 18px;
+      background: radial-gradient(circle at top right, rgba(188, 149, 92, 0.14), transparent 50%),
+                  radial-gradient(circle at bottom left, rgba(105, 28, 50, 0.09), transparent 50%);
+      overflow-y: auto;
+    }
+    .portal-grid {
+      max-width: 1240px; width: 100%; margin: auto; display: grid;
+      grid-template-columns: 1.38fr 0.62fr; gap: 32px; align-items: stretch;
+    }
+    .event-info {
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+
+    /* BLOQUE PROTAGONISTA DEL LOGO DEL CONGRESO EN GRANDE */
+    .hero-congreso {
+      display: flex; align-items: center; gap: 24px; margin-bottom: 18px;
+      background: #FFFFFF; padding: 22px; border-radius: 14px;
+      border: 1px solid #E2E8F0; border-left: 5px solid var(--guinda);
+      box-shadow: 0 6px 20px rgba(56, 10, 23, 0.06);
+    }
+    .congreso-logo-grande {
+      flex-shrink: 0; width: 205px; height: 205px; display: flex; align-items: center; justify-content: center;
+      background: #F4F4F6; border-radius: 12px; padding: 10px; border: 1px solid #E2E8F0;
+    }
+    .congreso-logo-grande img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+
+    .tag-vivo {
+      display: inline-flex; align-items: center; gap: 8px; background: var(--oro-suave); color: var(--guinda);
+      font-weight: 700; font-size: 11.5px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--oro); margin-bottom: 10px;
+    }
+    .dot-pulse { width: 8px; height: 8px; background: var(--guinda); border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .hero-texto h2 { font-size: 25px; font-weight: 700; color: var(--guinda-oscuro); line-height: 1.22; margin-bottom: 8px; }
+    .hero-texto .lema { font-size: 14px; font-style: italic; font-weight: 600; color: #8A6B3E; margin-bottom: 8px; }
+    .hero-texto p { font-size: 13.5px; color: var(--texto-gris); line-height: 1.5; }
+
+    /* RECUADRO INSTITUCIONES CONVOCANTES */
+    .instituciones-strip {
+      background: #FFFFFF; border-radius: 14px; padding: 18px 24px; border: 1.5px solid var(--oro);
+      box-shadow: 0 4px 16px rgba(56, 10, 23, 0.06);
+    }
+    .instituciones-label {
+      font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--guinda); margin-bottom: 14px; display: block;
+    }
+    .instituciones-logos {
+      display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+    }
+    .instituciones-logos img {
+      height: 64px; width: auto; max-width: 215px; object-fit: contain; display: block;
+    }
+
+    /* FILA INFERIOR DE REGISTRO Y FECHA */
+    .portal-cta-row {
+      max-width: 1240px; width: 100%; margin: 18px auto 0;
+      display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    }
+    .btn-secundario {
+      display: inline-block; background: var(--oro-crema); color: var(--guinda); border: 1.5px solid var(--oro);
+      padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
+    }
+    .btn-secundario:hover { background: var(--oro); color: var(--fondo-oscuro); }
+
+    /* TARJETA LOGIN CON MISMA ALTURA QUE LOS DOS BLOQUES DE LA IZQUIERDA */
+    .login-card {
+      background: #FFFFFF; border-radius: 14px; padding: 32px 28px;
+      box-shadow: 0 12px 32px rgba(56, 10, 23, 0.12); border-top: 5px solid var(--guinda);
+      display: flex; flex-direction: column; justify-content: center; height: 100%;
+    }
+    .login-card h3 { font-size: 21px; font-weight: 700; color: var(--guinda-oscuro); margin-bottom: 6px; }
+    .login-card .sub { font-size: 13.5px; color: var(--texto-gris); margin-bottom: 24px; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--texto-oscuro); margin-bottom: 6px; }
+    .input-wrap { position: relative; display: flex; align-items: center; }
+    .form-group input { width: 100%; padding: 13px 42px 13px 14px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-size: 14px; }
+    .form-group input:focus { outline: none; border-color: var(--guinda); }
+    .toggle-pass {
+      position: absolute; right: 10px; background: none; border: none; color: var(--texto-gris);
+      cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;
+    }
+    .toggle-pass:hover { color: var(--guinda); }
+
+    .btn-ingresar {
+      width: 100%; padding: 14px; background: linear-gradient(135deg, var(--guinda) 0%, var(--guinda-oscuro) 100%);
+      color: #FFFFFF; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px;
+    }
+    .btn-ingresar:hover { background: linear-gradient(135deg, var(--guinda-claro) 0%, var(--guinda) 100%); }
+    .btn-ingresar:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    #error-msg { display: none; margin-top: 14px; padding: 10px 12px; background: var(--error-bg); color: var(--error-txt); border-radius: 6px; font-size: 13px; font-weight: 500; text-align: center; }
+
+    .portal-footer-logos {
+      max-width: 1240px; width: 100%; margin: 18px auto 0; padding-top: 12px; border-top: 1px solid #E2E8F0;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--texto-gris);
+    }
+
+    /* VISTA DE TRANSMISIÓN ADAPTATIVA */
+    #stream-view {
+      display: none; flex: 1; min-height: 0; width: 100%; background: var(--fondo-oscuro); flex-direction: column;
+    }
+    .stream-subbar {
+      background: #1E0A14; border-bottom: 1.5px solid rgba(188, 149, 92, 0.45); padding: 7px 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-shrink: 0; flex-wrap: wrap;
+    }
+    .subbar-info { display: flex; align-items: center; gap: 10px; color: #FFF; }
+    .subbar-badge { background: var(--guinda); border: 1px solid var(--oro); color: var(--oro-crema); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 4px; }
+    .subbar-title { font-size: 13px; font-weight: 600; color: var(--oro-crema); }
+    
+    .subbar-logos { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .subbar-logo-light {
+      background: #FFFFFF; padding: 3px 8px; border-radius: 5px; height: 34px; border: 1px solid rgba(188,149,92,0.4);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .subbar-logo-light img { max-height: 26px; width: auto; display: block; }
+    .timer-badge {
+      font-size: 12px; font-weight: 600; color: var(--oro-suave); background: rgba(105, 28, 50, 0.55); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(188,149,92,0.45);
+    }
+
+    .stream-stage {
+      flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: row;
+    }
+    #video-wrapper { flex: 1; min-width: 0; min-height: 0; background: #000; position: relative; }
+    #video-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+
+    /* CONTENEDOR DE CHAT CON CUBIERTA INFERIOR PARA EVITAR SALIDA DE LA PLATAFORMA */
+    #chat-wrapper {
+      width: 380px; flex-shrink: 0; min-height: 0; border-left: 2px solid var(--guinda);
+      background: #0F0F0F; position: relative; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .chat-topbar {
+      background: #1E0A14; padding: 8px 14px; border-bottom: 1px solid var(--guinda);
+      display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 5;
+    }
+    .chat-topbar span { font-size: 12px; color: var(--oro-suave); font-weight: 600; }
+    #yt-chat { flex: 1; width: 100%; border: none; }
+    
+    /* FRANJA INFERIOR SUPERPUESTA SOBRE "ACCEDE PARA CHATEAR" DE YOUTUBE */
+    .chat-bottom-cover {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 92px;
+      background: linear-gradient(180deg, #16070E 0%, #1E0A14 100%);
+      border-top: 1.5px solid var(--oro);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 10px 16px; gap: 6px; z-index: 10;
+    }
+    .btn-chat-comentar {
+      width: 100%; background: linear-gradient(135deg, var(--guinda) 0%, var(--guinda-oscuro) 100%);
+      color: var(--oro-crema); border: 1.5px solid var(--oro); border-radius: 22px;
+      padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
+    }
+    .btn-chat-comentar:hover {
+      background: var(--oro); color: var(--fondo-oscuro);
+    }
+    .chat-bottom-hint {
+      font-size: 11px; color: #CBD5E1; text-align: center;
+    }
+
+    /* MODALES */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30, 10, 20, 0.78); z-index: 50; justify-content: center; align-items: center; padding: 20px; }
+    .modal-content { background: #FFFFFF; width: 100%; max-width: 680px; height: 85vh; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; border-top: 5px solid var(--oro); }
+    .modal-content.modal-sm { height: auto; max-width: 480px; }
+    .modal-header { background: var(--guinda); color: #FFF; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .close-modal { background: none; border: none; color: var(--oro-crema); font-size: 24px; cursor: pointer; line-height: 1; }
+    .modal-body { flex: 1; }
+    .modal-body iframe { width: 100%; height: 100%; border: none; }
+    .constancia-box { padding: 24px; text-align: center; }
+    .constancia-box p { font-size: 14px; color: var(--texto-gris); margin-bottom: 16px; line-height: 1.5; }
+    .status-pill { display: inline-block; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 18px; }
+    .status-ok { background: var(--ok-bg); color: var(--ok-txt); }
+    .status-wait { background: var(--oro-suave); color: var(--guinda); }
+
+    @media (max-width: 1024px) {
+      html, body { height: auto; min-height: 100%; }
+      header { padding: 14px 18px; }
+      .brand-title h1 { font-size: 16px; }
+      .portal-grid { grid-template-columns: 1fr; gap: 24px; }
+      .hero-congreso { flex-direction: column; text-align: center; }
+      .congreso-logo-grande { width: 170px; height: 170px; }
+      .instituciones-logos { justify-content: center; }
+      .instituciones-logos img { height: 52px; max-width: 165px; }
+      #stream-view { height: auto; }
+      .stream-stage { flex-direction: column; }
+      #video-wrapper { width: 100%; aspect-ratio: 16 / 9; min-height: 230px; max-height: 55vh; }
+      #chat-wrapper { width: 100%; height: 460px; min-height: 460px; border-left: none; border-top: 2px solid var(--guinda); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo-box">
+        <img src="img/usjt.png" alt="USJT" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2234%22><rect width=%2284%22 height=%2234%22 rx=%224%22 fill=%22%23691C32%22/><text x=%2242%22 y=%2222%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2215%22 fill=%22%23BC955C%22 text-anchor=%22middle%22>USJT</text></svg>';">
+      </div>
+      <div class="brand-title">
+        <h1>Congreso de Seguridad Pública</h1>
+        <span>Universidad de Seguridad y Justicia de Tamaulipas</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <span class="user-pill" id="user-pill">👤 <strong id="lbl-usuario-activo"></strong></span>
+      <button type="button" class="btn-constancia-top" id="btn-header-constancia" onclick="abrirModalConstancia()">🎓 Constancia</button>
+      <button type="button" class="btn-registro-top" id="btn-header-reg" onclick="abrirModalRegistro()">Obtener Acceso / Registro</button>
+      <button type="button" class="btn-salir-top" id="btn-header-salir" onclick="cerrarSesion()">← Cerrar Sesión</button>
+    </div>
+  </header>
+
+  <!-- VISTA 1: PORTAL DE INICIO DE SESIÓN -->
+  <main id="portal-view">
+    <div class="portal-grid">
+      <section class="event-info">
+        <!-- LOGO DEL CONGRESO EN GRANDE + TÍTULO OFICIAL -->
+        <div class="hero-congreso">
+          <div class="congreso-logo-grande">
+            <img src="img/congreso.png" alt="Congreso de Seguridad Pública" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22><rect width=%22160%22 height=%22160%22 rx=%2210%22 fill=%22%23F5EDD8%22/><text x=%2280%22 y=%2284%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2213%22 fill=%22%23691C32%22 text-anchor=%22middle%22>CONGRESO</text></svg>';">
+          </div>
+          <div class="hero-texto">
+            <div class="tag-vivo"><span class="dot-pulse"></span> TRANSMISIÓN EN DIRECTO</div>
+            <h2>Congreso de Seguridad Pública</h2>
+            <div class="lema">“Coordinación, Inteligencia y Desafíos”</div>
+            <p>Ingresa con el usuario y contraseña enviados a tu correo para acceder a la sala en vivo y registrar automáticamente tu asistencia para constancia.</p>
+          </div>
+        </div>
+
+        <!-- CINTILLA DE INSTITUCIONES CONVOCANTES -->
+        <div class="instituciones-strip">
+          <span class="instituciones-label">INSTITUCIONES CONVOCANTES</span>
+          <div class="instituciones-logos">
+            <img src="img/inst1.png" alt="Tamaulipas Gobierno del Estado" onerror="this.style.display='none'">
+            <img src="img/inst4.png" alt="Secretaría de Seguridad Pública" onerror="this.style.display='none'">
+            <img src="img/inst2.png" alt="Universidad Nacional Autónoma de México" onerror="this.style.display='none'">
+            <img src="img/inst3.png" alt="SUEDDSI" onerror="this.style.display='none'">
+          </div>
+        </div>
+      </section>
+
+      <section class="login-card">
+        <h3>Ingreso a la Sala</h3>
+        <p class="sub">Introduce tus credenciales asignadas</p>
+        <div class="form-group">
+          <label for="usuario">Usuario</label>
+          <input type="text" id="usuario" placeholder="Ej. juanmontel70" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <div class="input-wrap">
+            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+            <button type="button" class="toggle-pass" onclick="alternarPassword()" title="Mostrar u ocultar contraseña" aria-label="Mostrar contraseña">
+              <svg id="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button type="button" class="btn-ingresar" id="btn-entrar" onclick="iniciarSesion()">Entrar a la Transmisión</button>
+        <div id="error-msg"></div>
+      </section>
+    </div>
+
+    <div class="portal-cta-row">
+      <button type="button" class="btn-secundario" onclick="abrirModalRegistro()">¿Aún no tienes clave? Regístrate aquí</button>
+      <span style="font-size: 13px; color: var(--texto-gris); font-weight: 600;">Del 23 al 26 de noviembre de 2026 • Modalidad Híbrida</span>
+    </div>
+
+    <div class="portal-footer-logos">
+      <span>Universidad de Seguridad y Justicia de Tamaulipas</span>
+      <span>2026</span>
+    </div>
+  </main>
+
+  <!-- VISTA 2: SALA DE TRANSMISIÓN -->
+  <section id="stream-view">
+    <div class="stream-subbar">
+      <div class="subbar-info">
+        <span class="subbar-badge" id="lbl-sesion-activa">EN VIVO</span>
+        <span class="subbar-title">Congreso de Seguridad Pública</span>
+      </div>
+      <div class="subbar-logos">
+        <span class="timer-badge" id="lbl-tiempo-sesion">⏱ Tiempo en sala: 0 min</span>
+        <div class="subbar-logo-light"><img src="img/congreso.png" alt="Congreso" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-light"><img src="img/inst1.png" alt="Tamaulipas" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-light"><img src="img/inst4.png" alt="SSP" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-light"><img src="img/inst2.png" alt="UNAM" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-light"><img src="img/inst3.png" alt="SUEDDSI" onerror="this.parentElement.style.display='none'"></div>
+      </div>
+    </div>
+
+    <div class="stream-stage">
+      <div id="video-wrapper">
+        <iframe id="yt-video" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <div id="chat-wrapper">
+        <div class="chat-topbar">
+          <span>Chat de la Conferencia en Vivo</span>
+        </div>
+        <iframe id="yt-chat" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <div class="chat-bottom-cover">
+          <button type="button" class="btn-chat-comentar" onclick="abrirChatPopout()">💬 Abrir chat para comentar</button>
+          <span class="chat-bottom-hint">Se abrirá encima de este panel sin salir de la transmisión</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL REGISTRO -->
+  <div id="modal-registro" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>Registro de Asistencia — Congreso de Seguridad Pública</h4>
+        <button type="button" class="close-modal" onclick="cerrarModalRegistro()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdFA_SSFU8czw7g7lxPiTJYImGEf3jS872id06ZAiQclhpy0w/viewform?embedded=true">Cargando…</iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONSTANCIA -->
+  <div id="modal-constancia" class="modal-overlay">
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h4>Constancia Digital de Participación</h4>
+        <button type="button" class="close-modal" onclick="cerrarModalConstancia()">&times;</button>
+      </div>
+      <div class="constancia-box">
+        <div id="constancia-status" class="status-pill status-wait">Verificando asistencia...</div>
+        <p id="constancia-detalle">Consultando tus minutos acumulados en la sesión actual.</p>
+        <button type="button" class="btn-ingresar" id="btn-descargar-pdf" style="display:none;" onclick="generarPDFConstancia()">Descargar Constancia en PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwY_dzIAUvWmzdSRBuzcToanCsX_0PkXuaxCjQlf14tQkXBK3qRcmyHRYbWPeSEi2QgtQ/exec';
+
+    let sesionActiva = null;
+    let segundosPendientes = 0;
+    let segundosTotalesLocales = 0;
+    let intervaloContador = null;
+    let timeoutHeartbeat = null;
+
+    document.getElementById('password').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') iniciarSesion();
+    });
+
+    function alternarPassword() {
+      const input = document.getElementById('password');
+      const eye = document.getElementById('icon-eye');
+      if (input.type === 'password') {
+        input.type = 'text';
+        eye.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+      } else {
+        input.type = 'password';
+        eye.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+      }
+    }
+
+    function abrirModalRegistro() {
+      document.getElementById('modal-registro').style.display = 'flex';
+    }
+
+    function cerrarModalRegistro() {
+      document.getElementById('modal-registro').style.display = 'none';
+    }
+
+    function cerrarModalConstancia() {
+      document.getElementById('modal-constancia').style.display = 'none';
+    }
+
+    function abrirChatPopout() {
+      const srcChat = document.getElementById('yt-chat').src;
+      if (!srcChat) return;
+      const urlPopout = srcChat.split('&embed_domain')[0] + '&is_popout=1';
+
+      // Calcula la posición exacta del panel derecho del chat en el monitor
+      const chatBox = document.getElementById('chat-wrapper');
+      const rect = chatBox.getBoundingClientRect();
+      const winLeft = window.screenX !== undefined ? window.screenX : window.screenLeft;
+      const winTop = window.screenY !== undefined ? window.screenY : window.screenTop;
+      const barraSuperior = window.outerHeight - window.innerHeight;
+
+      const anchoPopout = Math.max(360, Math.round(rect.width));
+      const altoPopout = Math.max(520, Math.round(rect.height));
+      const posX = Math.max(0, Math.round(winLeft + rect.left));
+      const posY = Math.max(0, Math.round(winTop + barraSuperior + rect.top));
+
+      window.open(
+        urlPopout,
+        'ChatCongresoUSJT',
+        `width=${anchoPopout},height=${altoPopout},left=${posX},top=${posY},menubar=no,toolbar=no,location=no,status=no`
+      );
+    }
+
+    function iniciarSesion() {
+      const user = document.getElementById('usuario').value;
+      const pass = document.getElementById('password').value;
+      const btn = document.getElementById('btn-entrar');
+      const errorDiv = document.getElementById('error-msg');
+
+      if (!user || !pass) {
+        mostrarError('Por favor ingresa tu usuario y contraseña.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Verificando credenciales...';
+      errorDiv.style.display = 'none';
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ accion: 'login', usuario: user, password: pass })
+      })
+      .then(response => response.json())
+      .then(res => {
+        if (res.autorizado) {
+          sesionActiva = {
+            usuario: res.usuario,
+            nombre: res.nombre,
+            sesion: res.sesion,
+            minutosMinimos: res.minutosMinimos
+          };
+          cargarTransmision(res.videoId);
+        } else {
+          mostrarError(res.mensaje);
+          btn.disabled = false;
+          btn.textContent = 'Entrar a la Transmisión';
+        }
+      })
+      .catch(() => {
+        mostrarError('Error de conexión con la base de datos. Verifica tu red.');
+        btn.disabled = false;
+        btn.textContent = 'Entrar a la Transmisión';
+      });
+    }
+
+    function mostrarError(texto) {
+      const errorDiv = document.getElementById('error-msg');
+      errorDiv.textContent = texto;
+      errorDiv.style.display = 'block';
+    }
+
+    function cargarTransmision(videoId) {
+      document.getElementById('portal-view').style.display = 'none';
+      document.getElementById('btn-header-reg').style.display = 'none';
+      
+      document.getElementById('lbl-usuario-activo').textContent = sesionActiva.nombre;
+      document.getElementById('lbl-sesion-activa').textContent = sesionActiva.sesion;
+      document.getElementById('user-pill').style.display = 'inline-flex';
+      document.getElementById('btn-header-constancia').style.display = 'inline-block';
+      document.getElementById('btn-header-salir').style.display = 'inline-block';
+      document.getElementById('stream-view').style.display = 'flex';
+
+      const dominioActual = window.location.hostname;
+      document.getElementById('yt-video').src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&origin=https://${dominioActual}`;
+      document.getElementById('yt-chat').src = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${dominioActual}&dark_theme=1`;
+
+      iniciarConteoTiempo();
+    }
+
+    function cerrarSesion() {
+      enviarHeartbeat(true);
+      detenerConteoTiempo();
+      sesionActiva = null;
+
+      document.getElementById('yt-video').src = '';
+      document.getElementById('yt-chat').src = '';
+
+      document.getElementById('stream-view').style.display = 'none';
+      document.getElementById('user-pill').style.display = 'none';
+      document.getElementById('btn-header-constancia').style.display = 'none';
+      document.getElementById('btn-header-salir').style.display = 'none';
+
+      document.getElementById('portal-view').style.display = 'flex';
+      document.getElementById('btn-header-reg').style.display = 'inline-block';
+      const btn = document.getElementById('btn-entrar');
+      btn.disabled = false;
+      btn.textContent = 'Entrar a la Transmisión';
+    }
+
+    function iniciarConteoTiempo() {
+      const claveRespaldo = `usjt_pendiente_${sesionActiva.usuario}`;
+      segundosPendientes = Number(localStorage.getItem(claveRespaldo)) || 0;
+      segundosTotalesLocales = segundosPendientes;
+
+      const primerPulso = Math.floor(15000 + Math.random() * 45000);
+      timeoutHeartbeat = setTimeout(cicloHeartbeat, primerPulso);
+
+      intervaloContador = setInterval(() => {
+        if (!sesionActiva) return;
+        segundosPendientes++;
+        segundosTotalesLocales++;
+        localStorage.setItem(claveRespaldo, segundosPendientes);
+
+        const mins = Math.floor(segundosTotalesLocales / 60);
+        document.getElementById('lbl-tiempo-sesion').textContent = `⏱ Tiempo en sala: ${mins} min`;
+      }, 1000);
+    }
+
+    function cicloHeartbeat() {
+      if (!sesionActiva) return;
+      enviarHeartbeat(false);
+      const siguienteIntervalo = Math.floor(600000 + Math.random() * 300000);
+      timeoutHeartbeat = setTimeout(cicloHeartbeat, siguienteIntervalo);
+    }
+
+    function enviarHeartbeat(alSalir) {
+      if (!sesionActiva || segundosPendientes < 5) return;
+      const usuarioActual = sesionActiva.usuario;
+      const claveRespaldo = `usjt_pendiente_${usuarioActual}`;
+      const envio = segundosPendientes;
+
+      segundosPendientes = 0;
+      localStorage.setItem(claveRespaldo, 0);
+
+      const payload = JSON.stringify({
+        accion: 'heartbeat',
+        usuario: usuarioActual,
+        segundos: envio
+      });
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: payload,
+        keepalive: alSalir
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res && res.retry) {
+          segundosPendientes += envio;
+          localStorage.setItem(claveRespaldo, segundosPendientes);
+        }
+      })
+      .catch(() => {
+        segundosPendientes += envio;
+        localStorage.setItem(claveRespaldo, segundosPendientes);
+      });
+    }
+
+    function detenerConteoTiempo() {
+      clearInterval(intervaloContador);
+      clearTimeout(timeoutHeartbeat);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && sesionActiva) {
+        enviarHeartbeat(true);
+      }
+    });
+
+    function abrirModalConstancia() {
+      if (!sesionActiva) return;
+      enviarHeartbeat(false);
+      document.getElementById('modal-constancia').style.display = 'flex';
+      const statusEl = document.getElementById('constancia-status');
+      const detalleEl = document.getElementById('constancia-detalle');
+      const btnPdf = document.getElementById('btn-descargar-pdf');
+
+      statusEl.className = 'status-pill status-wait';
+      statusEl.textContent = 'Consultando registro...';
+      btnPdf.style.display = 'none';
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ accion: 'consultar_constancia', usuario: sesionActiva.usuario })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.cumple) {
+          statusEl.className = 'status-pill status-ok';
+          statusEl.textContent = `✓ Acreditado (${res.minutos} min registrados)`;
+          detalleEl.innerHTML = `Has cumplido el tiempo mínimo requerido (<strong>${res.requeridos} min</strong>) para <strong>${res.sesion}</strong>. Ya puedes descargar tu constancia.`;
+          btnPdf.style.display = 'inline-block';
+        } else {
+          statusEl.className = 'status-pill status-wait';
+          statusEl.textContent = `En progreso: ${res.minutos} / ${res.requeridos} min`;
+          detalleEl.innerHTML = `Permanece conectado en la sesión <strong>${res.sesion}</strong> hasta completar al menos <strong>${res.requeridos} minutos</strong> para habilitar la descarga.`;
+        }
+      })
+      .catch(() => {
+        statusEl.textContent = 'No se pudo consultar en este momento';
+      });
+    }
+
+    function generarPDFConstancia() {
+      if (!sesionActiva || !window.jspdf) return;
+      const { jsPDF } = window.jspdf;
+      const btnPdf = document.getElementById('btn-descargar-pdf');
+      
+      btnPdf.disabled = true;
+      btnPdf.textContent = 'Generando PDF institucional...';
+
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.src = 'img/plantilla.png?v=' + new Date().getTime();
+
+      img.onload = function() {
+        const esHorizontal = img.naturalWidth >= img.naturalHeight;
+        const doc = new jsPDF({
+          orientation: esHorizontal ? 'landscape' : 'portrait',
+          unit: 'mm',
+          format: 'letter'
+        });
+
+        const anchoPagina = doc.internal.pageSize.getWidth();
+        const altoPagina = doc.internal.pageSize.getHeight();
+        const centroX = anchoPagina / 2;
+
+        doc.addImage(img, 'PNG', 0, 0, anchoPagina, altoPagina, undefined, 'SLOW');
+
+        const posYNombre = altoPagina * 0.48;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.setTextColor(105, 28, 50);
+        doc.text(sesionActiva.nombre.toUpperCase(), centroX, posYNombre, { align: 'center', maxWidth: anchoPagina - 40 });
+
+        const folio = `USJT-CONGRESO-${sesionActiva.usuario.toUpperCase()}-2026`;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(90, 90, 90);
+        doc.text(`Folio de verificación: ${folio}`, centroX, altoPagina - 12, { align: 'center' });
+
+        doc.save(`Constancia_${sesionActiva.usuario}.pdf`);
+        btnPdf.disabled = false;
+        btnPdf.textContent = 'Descargar Constancia en PDF';
+      };
+
+      img.onerror = function() {
+        alert('No se encontró img/plantilla.png en el repositorio. Verifica que esté dentro de la carpeta img/.');
+        btnPdf.disabled = false;
+        btnPdf.textContent = 'Descargar Constancia en PDF';
+      };
+    }
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Congreso de Seguridad Pública | USJT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --guinda: #691C32; --guinda-claro: #8B2645; --guinda-oscuro: #4B1122;
+      --oro: #BC955C; --oro-suave: #F5EDD8; --oro-crema: #FFF7E6;
+      --fondo-oscuro: #1E0A14; --fondo-claro: #F8FAFC;
+      --texto-oscuro: #1E293B; --texto-gris: #64748B;
+      --error-bg: #FEE2E2; --error-txt: #991B1B;
+      --ok-bg: #DCFCE7; --ok-txt: #166534;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Encode Sans', sans-serif; }
+    html, body { height: 100%; background-color: var(--fondo-claro); color: var(--texto-oscuro); }
+    body { display: flex; flex-direction: column; }
+
+    /* CINTILLA SUPERIOR AMPLIADA */
+    header {
+      background: linear-gradient(90deg, var(--fondo-oscuro) 0%, var(--guinda) 100%);
+      color: #FFFFFF; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 4px solid var(--oro); box-shadow: 0 4px 14px rgba(56, 10, 23, 0.28); z-index: 20; flex-shrink: 0; gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 16px; }
+    .brand-logo-box {
+      background: #FFFFFF; padding: 6px 14px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; height: 54px; border: 1.5px solid var(--oro);
+    }
+    .brand-logo-box img { max-height: 42px; width: auto; display: block; }
+    .brand-title h1 { font-size: 18.5px; font-weight: 700; letter-spacing: -0.2px; }
+    .brand-title span { font-size: 12.5px; color: var(--oro-suave); display: block; margin-top: 2px; font-weight: 500; }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .user-pill {
+      display: none; align-items: center; gap: 8px; background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(188, 149, 92, 0.5); padding: 7px 14px; border-radius: 20px; font-size: 12.5px; color: var(--oro-crema);
+    }
+    .btn-registro-top, .btn-salir-top, .btn-constancia-top {
+      background: transparent; border: 1.5px solid var(--oro); color: var(--oro-crema);
+      padding: 9px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .btn-registro-top:hover { background: var(--oro); color: var(--fondo-oscuro); }
+    .btn-constancia-top { display: none; background: var(--oro); color: var(--fondo-oscuro); }
+    .btn-constancia-top:hover { background: var(--oro-crema); }
+    .btn-salir-top { display: none; border-color: #FCA5A5; color: #FECACA; }
+    .btn-salir-top:hover { background: #991B1B; border-color: #991B1B; color: #FFF; }
+
+    /* VISTA PORTAL DE INICIO CON ALTURA UNIFORME ENTRE COLUMNAS */
+    #portal-view {
+      flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 24px 18px;
+      background: radial-gradient(circle at top right, rgba(188, 149, 92, 0.14), transparent 50%),
+                  radial-gradient(circle at bottom left, rgba(105, 28, 50, 0.09), transparent 50%);
+      overflow-y: auto;
+    }
+    .portal-grid {
+      max-width: 1240px; width: 100%; margin: auto; display: grid;
+      grid-template-columns: 1.38fr 0.62fr; gap: 32px; align-items: stretch;
+    }
+    .event-info {
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+
+    /* BLOQUE PROTAGONISTA DEL LOGO DEL CONGRESO EN GRANDE */
+    .hero-congreso {
+      display: flex; align-items: center; gap: 24px; margin-bottom: 18px;
+      background: #FFFFFF; padding: 22px; border-radius: 14px;
+      border: 1px solid #E2E8F0; border-left: 5px solid var(--guinda);
+      box-shadow: 0 6px 20px rgba(56, 10, 23, 0.06);
+    }
+    .congreso-logo-grande {
+      flex-shrink: 0; width: 205px; height: 205px; display: flex; align-items: center; justify-content: center;
+      background: #F4F4F6; border-radius: 12px; padding: 10px; border: 1px solid #E2E8F0;
+    }
+    .congreso-logo-grande img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+
+    .tag-vivo {
+      display: inline-flex; align-items: center; gap: 8px; background: var(--oro-suave); color: var(--guinda);
+      font-weight: 700; font-size: 11.5px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--oro); margin-bottom: 10px;
+    }
+    .dot-pulse { width: 8px; height: 8px; background: var(--guinda); border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .hero-texto h2 { font-size: 25px; font-weight: 700; color: var(--guinda-oscuro); line-height: 1.22; margin-bottom: 8px; }
+    .hero-texto .lema { font-size: 14px; font-style: italic; font-weight: 600; color: #8A6B3E; margin-bottom: 8px; }
+    .hero-texto p { font-size: 13.5px; color: var(--texto-gris); line-height: 1.5; }
+
+    /* RECUADRO INSTITUCIONES CONVOCANTES */
+    .instituciones-strip {
+      background: #FFFFFF; border-radius: 14px; padding: 18px 24px; border: 1.5px solid var(--oro);
+      box-shadow: 0 4px 16px rgba(56, 10, 23, 0.06);
+    }
+    .instituciones-label {
+      font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--guinda); margin-bottom: 14px; display: block;
+    }
+    .instituciones-logos {
+      display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+    }
+    .instituciones-logos img {
+      height: 64px; width: auto; max-width: 215px; object-fit: contain; display: block;
+    }
+
+    /* FILA INFERIOR DE REGISTRO Y FECHA */
+    .portal-cta-row {
+      max-width: 1240px; width: 100%; margin: 18px auto 0;
+      display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    }
+    .btn-secundario {
+      display: inline-block; background: var(--oro-crema); color: var(--guinda); border: 1.5px solid var(--oro);
+      padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
+    }
+    .btn-secundario:hover { background: var(--oro); color: var(--fondo-oscuro); }
+
+    /* TARJETA LOGIN CON MISMA ALTURA QUE LOS DOS BLOQUES DE LA IZQUIERDA */
+    .login-card {
+      background: #FFFFFF; border-radius: 14px; padding: 32px 28px;
+      box-shadow: 0 12px 32px rgba(56, 10, 23, 0.12); border-top: 5px solid var(--guinda);
+      display: flex; flex-direction: column; justify-content: center; height: 100%;
+    }
+    .login-card h3 { font-size: 21px; font-weight: 700; color: var(--guinda-oscuro); margin-bottom: 6px; }
+    .login-card .sub { font-size: 13.5px; color: var(--texto-gris); margin-bottom: 24px; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--texto-oscuro); margin-bottom: 6px; }
+    .input-wrap { position: relative; display: flex; align-items: center; }
+    .form-group input { width: 100%; padding: 13px 42px 13px 14px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-size: 14px; }
+    .form-group input:focus { outline: none; border-color: var(--guinda); }
+    .toggle-pass {
+      position: absolute; right: 10px; background: none; border: none; color: var(--texto-gris);
+      cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;
+    }
+    .toggle-pass:hover { color: var(--guinda); }
+
+    .btn-ingresar {
+      width: 100%; padding: 14px; background: linear-gradient(135deg, var(--guinda) 0%, var(--guinda-oscuro) 100%);
+      color: #FFFFFF; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px;
+    }
+    .btn-ingresar:hover { background: linear-gradient(135deg, var(--guinda-claro) 0%, var(--guinda) 100%); }
+    .btn-ingresar:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    #error-msg { display: none; margin-top: 14px; padding: 10px 12px; background: var(--error-bg); color: var(--error-txt); border-radius: 6px; font-size: 13px; font-weight: 500; text-align: center; }
+
+    .portal-footer-logos {
+      max-width: 1240px; width: 100%; margin: 18px auto 0; padding-top: 12px; border-top: 1px solid #E2E8F0;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--texto-gris);
+    }
+
+    /* VISTA DE TRANSMISIÓN ADAPTATIVA */
+    #stream-view {
+      display: none; flex: 1; min-height: 0; width: 100%; background: var(--fondo-oscuro); flex-direction: column;
+    }
+    .stream-subbar {
+      background: #1E0A14; border-bottom: 1.5px solid rgba(188, 149, 92, 0.45); padding: 7px 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-shrink: 0; flex-wrap: wrap;
+    }
+    .subbar-info { display: flex; align-items: center; gap: 10px; color: #FFF; }
+    .subbar-badge { background: var(--guinda); border: 1px solid var(--oro); color: var(--oro-crema); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 4px; }
+    .subbar-title { font-size: 13px; font-weight: 600; color: var(--oro-crema); }
+    
+    .subbar-logos { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .subbar-logo-light {
+      background: #FFFFFF; padding: 3px 8px; border-radius: 5px; height: 34px; border: 1px solid rgba(188,149,92,0.4);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .subbar-logo-light img { max-height: 26px; width: auto; display: block; }
+    .timer-badge {
+      font-size: 12px; font-weight: 600; color: var(--oro-suave); background: rgba(105, 28, 50, 0.55); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(188,149,92,0.45);
+    }
+
+    .stream-stage {
+      flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: row;
+    }
+    #video-wrapper { flex: 1; min-width: 0; min-height: 0; background: #000; position: relative; }
+    #video-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+
+    /* CONTENEDOR DE CHAT CON CUBIERTA INFERIOR PARA EVITAR SALIDA DE LA PLATAFORMA */
+    #chat-wrapper {
+      width: 380px; flex-shrink: 0; min-height: 0; border-left: 2px solid var(--guinda);
+      background: #0F0F0F; position: relative; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .chat-topbar {
+      background: #1E0A14; padding: 8px 14px; border-bottom: 1px solid var(--guinda);
+      display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 5;
+    }
+    .chat-topbar span { font-size: 12px; color: var(--oro-suave); font-weight: 600; }
+    #yt-chat { flex: 1; width: 100%; border: none; }
+    
+    /* FRANJA INFERIOR SUPERPUESTA SOBRE "ACCEDE PARA CHATEAR" DE YOUTUBE */
+    .chat-bottom-cover {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 92px;
+      background: linear-gradient(180deg, #16070E 0%, #1E0A14 100%);
+      border-top: 1.5px solid var(--oro);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 10px 16px; gap: 6px; z-index: 10;
+    }
+    .btn-chat-comentar {
+      width: 100%; background: linear-gradient(135deg, var(--guinda) 0%, var(--guinda-oscuro) 100%);
+      color: var(--oro-crema); border: 1.5px solid var(--oro); border-radius: 22px;
+      padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
+    }
+    .btn-chat-comentar:hover {
+      background: var(--oro); color: var(--fondo-oscuro);
+    }
+    .chat-bottom-hint {
+      font-size: 11px; color: #CBD5E1; text-align: center;
+    }
+
+    /* MODALES */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30, 10, 20, 0.78); z-index: 50; justify-content: center; align-items: center; padding: 20px; }
+    .modal-content { background: #FFFFFF; width: 100%; max-width: 680px; height: 85vh; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; border-top: 5px solid var(--oro); }
+    .modal-content.modal-sm { height: auto; max-width: 480px; }
+    .modal-header { background: var(--guinda); color: #FFF; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .close-modal { background: none; border: none; color: var(--oro-crema); font-size: 24px; cursor: pointer; line-height: 1; }
+    .modal-body { flex: 1; }
+    .modal-body iframe { width: 100%; height: 100%; border: none; }
+    .constancia-box { padding: 24px; text-align: center; }
+    .constancia-box p { font-size: 14px; color: var(--texto-gris); margin-bottom: 16px; line-height: 1.5; }
+    .status-pill { display: inline-block; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 18px; }
+    .status-ok { background: var(--ok-bg); color: var(--ok-txt); }
+    .status-wait { background: var(--oro-suave); color: var(--guinda); }
+
+    @media (max-width: 1024px) {
+      html, body { height: auto; min-height: 100%; }
+      header { padding: 14px 18px; }
+      .brand-title h1 { font-size: 16px; }
+      .portal-grid { grid-template-columns: 1fr; gap: 24px; }
+      .hero-congreso { flex-direction: column; text-align: center; }
+      .congreso-logo-grande { width: 170px; height: 170px; }
+      .instituciones-logos { justify-content: center; }
+      .instituciones-logos img { height: 52px; max-width: 165px; }
+      #stream-view { height: auto; }
+      .stream-stage { flex-direction: column; }
+      #video-wrapper { width: 100%; aspect-ratio: 16 / 9; min-height: 230px; max-height: 55vh; }
+      #chat-wrapper { width: 100%; height: 460px; min-height: 460px; border-left: none; border-top: 2px solid var(--guinda); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo-box">
+        <img src="img/usjt.png" alt="USJT" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2234%22><rect width=%2284%22 height=%2234%22 rx=%224%22 fill=%22%23691C32%22/><text x=%2242%22 y=%2222%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2215%22 fill=%22%23BC955C%22 text-anchor=%22middle%22>USJT</text></svg>';">
+      </div>
+      <div class="brand-title">
+        <h1>Congreso de Seguridad Pública</h1>
+        <span>Universidad de Seguridad y Justicia de Tamaulipas</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <span class="user-pill" id="user-pill">👤 <strong id="lbl-usuario-activo"></strong></span>
+      <button type="button" class="btn-constancia-top" id="btn-header-constancia" onclick="abrirModalConstancia()">🎓 Constancia</button>
+      <button type="button" class="btn-registro-top" id="btn-header-reg" onclick="abrirModalRegistro()">Obtener Acceso / Registro</button>
+      <button type="button" class="btn-salir-top" id="btn-header-salir" onclick="cerrarSesion()">← Cerrar Sesión</button>
+    </div>
+  </header>
+
+  <!-- VISTA 1: PORTAL DE INICIO DE SESIÓN -->
+  <main id="portal-view">
+    <div class="portal-grid">
+      <section class="event-info">
+        <!-- LOGO DEL CONGRESO EN GRANDE + TÍTULO OFICIAL -->
+        <div class="hero-congreso">
+          <div class="congreso-logo-grande">
+            <img src="img/congreso.png" alt="Congreso de Seguridad Pública" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22><rect width=%22160%22 height=%22160%22 rx=%2210%22 fill=%22%23F5EDD8%22/><text x=%2280%22 y=%2284%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2213%22 fill=%22%23691C32%22 text-anchor=%22middle%22>CONGRESO</text></svg>';">
+          </div>
+          <div class="hero-texto">
+            <div class="tag-vivo"><span class="dot-pulse"></span> TRANSMISIÓN EN DIRECTO</div>
+            <h2>Congreso de Seguridad Pública</h2>
+            <div class="lema">“Coordinación, Inteligencia y Desafíos”</div>
+            <p>Ingresa con el usuario y contraseña enviados a tu correo para acceder a la sala en vivo y registrar automáticamente tu asistencia para constancia.</p>
+          </div>
+        </div>
+
+        <!-- CINTILLA DE INSTITUCIONES CONVOCANTES -->
+        <div class="instituciones-strip">
+          <span class="instituciones-label">INSTITUCIONES CONVOCANTES</span>
+          <div class="instituciones-logos">
+            <img src="img/inst1.png" alt="Tamaulipas Gobierno del Estado" onerror="this.style.display='none'">
+            <img src="img/inst4.png" alt="Secretaría de Seguridad Pública" onerror="this.style.display='none'">
+            <img src="img/inst2.png" alt="Universidad Nacional Autónoma de México" onerror="this.style.display='none'">
+            <img src="img/inst3.png" alt="SUEDDSI" onerror="this.style.display='none'">
+          </div>
+        </div>
+      </section>
+
+      <section class="login-card">
+        <h3>Ingreso a la Sala</h3>
+        <p class="sub">Introduce tus credenciales asignadas</p>
+        <div class="form-group">
+          <label for="usuario">Usuario</label>
+          <input type="text" id="usuario" placeholder="Ej. juanmontel70" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <div class="input-wrap">
+            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+            <button type="button" class="toggle-pass" onclick="alternarPassword()" title="Mostrar u ocultar contraseña" aria-label="Mostrar contraseña">
+              <svg id="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button type="button" class="btn-ingresar" id="btn-entrar" onclick="iniciarSesion()">Entrar a la Transmisión</button>
+        <div id="error-msg"></div>
+      </section>
+    </div>
+
+    <div class="portal-cta-row">
+      <button type="button" class="btn-secundario" onclick="abrirModalRegistro()">¿Aún no tienes clave? Regístrate aquí</button>
+      <span style="font-size: 13px; color: var(--texto-gris); font-weight: 600;">Del 23 al 26 de noviembre de 2026 • Modalidad Híbrida</span>
+    </div>
+
+    <div class="portal-footer-logos">
+      <span>Universidad de Seguridad y Justicia de Tamaulipas</span>
+      <span>2026</span>
+    </div>
+  </main>
+
+  <!-- VISTA 2: SALA DE TRANSMISIÓN -->
+  <section id="stream-view">
+    <div class="stream-subbar">
+      <div class="subbar-info">
+        <span class="subbar-badge" id="lbl-sesion-activa">EN VIVO</span>
+        <span class="subbar-title">Congreso de Seguridad Pública</span>
+      </div>
+      <div class="subbar-logos">
+        <span class="timer-badge" id="lbl-tiempo-sesion">⏱ Tiempo en sala: 0 min</span>
+        <div class="subbar-logo-light"><img src="img/congreso.png" alt="Congreso" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-light"><img src="img/inst1.png" alt="Tamaulipas" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-light"><img src="img/inst4.png" alt="SSP" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-light"><img src="img/inst2.png" alt="UNAM" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-light"><img src="img/inst3.png" alt="SUEDDSI" onerror="this.parentElement.style.display='none'"></div>
+      </div>
+    </div>
+
+    <div class="stream-stage">
+      <div id="video-wrapper">
+        <iframe id="yt-video" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <div id="chat-wrapper">
+        <div class="chat-topbar">
+          <span>Chat de la Conferencia en Vivo</span>
+        </div>
+        <iframe id="yt-chat" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <div class="chat-bottom-cover">
+          <button type="button" class="btn-chat-comentar" onclick="abrirChatPopout()">💬 Abrir chat para comentar</button>
+          <span class="chat-bottom-hint">Se abrirá encima de este panel sin salir de la transmisión</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL REGISTRO -->
+  <div id="modal-registro" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>Registro de Asistencia — Congreso de Seguridad Pública</h4>
+        <button type="button" class="close-modal" onclick="cerrarModalRegistro()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdFA_SSFU8czw7g7lxPiTJYImGEf3jS872id06ZAiQclhpy0w/viewform?embedded=true">Cargando…</iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONSTANCIA -->
+  <div id="modal-constancia" class="modal-overlay">
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h4>Constancia Digital de Participación</h4>
+        <button type="button" class="close-modal" onclick="cerrarModalConstancia()">&times;</button>
+      </div>
+      <div class="constancia-box">
+        <div id="constancia-status" class="status-pill status-wait">Verificando asistencia...</div>
+        <p id="constancia-detalle">Consultando tus minutos acumulados en la sesión actual.</p>
+        <button type="button" class="btn-ingresar" id="btn-descargar-pdf" style="display:none;" onclick="generarPDFConstancia()">Descargar Constancia en PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwY_dzIAUvWmzdSRBuzcToanCsX_0PkXuaxCjQlf14tQkXBK3qRcmyHRYbWPeSEi2QgtQ/exec';
+
+    let sesionActiva = null;
+    let segundosPendientes = 0;
+    let segundosTotalesLocales = 0;
+    let intervaloContador = null;
+    let timeoutHeartbeat = null;
+
+    document.getElementById('password').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') iniciarSesion();
+    });
+
+    function alternarPassword() {
+      const input = document.getElementById('password');
+      const eye = document.getElementById('icon-eye');
+      if (input.type === 'password') {
+        input.type = 'text';
+        eye.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+      } else {
+        input.type = 'password';
+        eye.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+      }
+    }
+
+    function abrirModalRegistro() {
+      document.getElementById('modal-registro').style.display = 'flex';
+    }
+
+    function cerrarModalRegistro() {
+      document.getElementById('modal-registro').style.display = 'none';
+    }
+
+    function cerrarModalConstancia() {
+      document.getElementById('modal-constancia').style.display = 'none';
+    }
+
+    function abrirChatPopout() {
+      const srcChat = document.getElementById('yt-chat').src;
+      if (!srcChat) return;
+      const urlPopout = srcChat.split('&embed_domain')[0] + '&is_popout=1';
+
+      // Calcula la posición exacta del panel derecho del chat en el monitor
+      const chatBox = document.getElementById('chat-wrapper');
+      const rect = chatBox.getBoundingClientRect();
+      const winLeft = window.screenX !== undefined ? window.screenX : window.screenLeft;
+      const winTop = window.screenY !== undefined ? window.screenY : window.screenTop;
+      const barraSuperior = window.outerHeight - window.innerHeight;
+
+      const anchoPopout = Math.max(360, Math.round(rect.width));
+      const altoPopout = Math.max(520, Math.round(rect.height));
+      const posX = Math.max(0, Math.round(winLeft + rect.left));
+      const posY = Math.max(0, Math.round(winTop + barraSuperior + rect.top));
+
+      window.open(
+        urlPopout,
+        'ChatCongresoUSJT',
+        `width=${anchoPopout},height=${altoPopout},left=${posX},top=${posY},menubar=no,toolbar=no,location=no,status=no`
+      );
     }
 
     function iniciarSesion() {
