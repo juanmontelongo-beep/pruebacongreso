@@ -8,10 +8,17 @@
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <style>
     :root {
-      --guinda: #691C32; --guinda-claro: #8B2645; --guinda-oscuro: #4B1122;
-      --oro: #BC955C; --oro-suave: #F5EDD8; --oro-crema: #FFF7E6;
-      --fondo-oscuro: #1E0A14; --fondo-claro: #F8FAFC;
-      --texto-oscuro: #1E293B; --texto-gris: #64748B;
+      /* PALETA OFICIAL DE COLOR */
+      --guinda: #AB0033;
+      --guinda-claro: #C4003B;
+      --guinda-oscuro: #7D0025;
+      --oro: #BC955C;
+      --arena: #DDC9A3;
+      --arena-claro: #F6EFE2;
+      --gris-institucional: #54565A;
+      --gris-oscuro: #2E3033;
+      --fondo-claro: #F8F8F9;
+      --texto-oscuro: #232426;
       --error-bg: #FEE2E2; --error-txt: #991B1B;
       --ok-bg: #DCFCE7; --ok-txt: #166534;
     }
@@ -19,11 +26,11 @@
     html, body { min-height: 100vh; background-color: var(--fondo-claro); color: var(--texto-oscuro); }
     body { display: flex; flex-direction: column; overflow-x: hidden; }
 
-    /* CINTILLA SUPERIOR AMPLIADA */
+    /* CINTILLA SUPERIOR AMPLIADA CON PALETA OFICIAL */
     header {
-      background: linear-gradient(90deg, var(--fondo-oscuro) 0%, var(--guinda) 100%);
+      background: linear-gradient(90deg, var(--guinda-oscuro) 0%, var(--guinda) 100%);
       color: #FFFFFF; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 4px solid var(--oro); box-shadow: 0 4px 14px rgba(56, 10, 23, 0.28); z-index: 20; flex-shrink: 0; gap: 16px;
+      border-bottom: 4px solid var(--oro); box-shadow: 0 4px 14px rgba(84, 86, 90, 0.25); z-index: 20; flex-shrink: 0; gap: 16px;
       position: relative;
     }
     .brand { display: flex; align-items: center; gap: 16px; }
@@ -33,29 +40,29 @@
     }
     .brand-logo-box img { max-height: 42px; width: auto; display: block; }
     .brand-title h1 { font-size: 18.5px; font-weight: 700; letter-spacing: -0.2px; }
-    .brand-title span { font-size: 12.5px; color: var(--oro-suave); display: block; margin-top: 2px; font-weight: 500; }
+    .brand-title span { font-size: 12.5px; color: var(--arena); display: block; margin-top: 2px; font-weight: 500; }
 
     .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .user-pill {
       display: none; align-items: center; gap: 8px; background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(188, 149, 92, 0.5); padding: 7px 14px; border-radius: 20px; font-size: 12.5px; color: var(--oro-crema);
+      border: 1px solid var(--arena); padding: 7px 14px; border-radius: 20px; font-size: 12.5px; color: #FFFFFF;
     }
     .btn-registro-top, .btn-salir-top, .btn-constancia-top, .btn-programa-top {
-      background: transparent; border: 1.5px solid var(--oro); color: var(--oro-crema);
+      background: transparent; border: 1.5px solid var(--oro); color: #FFFFFF;
       padding: 9px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
     }
-    .btn-registro-top:hover, .btn-programa-top:hover { background: var(--oro); color: var(--fondo-oscuro); }
-    .btn-constancia-top { display: none; background: var(--oro); color: var(--fondo-oscuro); }
-    .btn-constancia-top:hover { background: var(--oro-crema); }
-    .btn-salir-top { display: none; border-color: #FCA5A5; color: #FECACA; }
-    .btn-salir-top:hover { background: #991B1B; border-color: #991B1B; color: #FFF; }
+    .btn-registro-top:hover, .btn-programa-top:hover { background: var(--oro); color: #FFFFFF; }
+    .btn-constancia-top { display: none; background: var(--oro); color: #FFFFFF; }
+    .btn-constancia-top:hover { background: var(--arena); color: var(--guinda-oscuro); }
+    .btn-salir-top { display: none; border-color: var(--arena); color: var(--arena); }
+    .btn-salir-top:hover { background: var(--gris-institucional); border-color: var(--gris-institucional); color: #FFFFFF; }
 
     /* VISTA PORTAL DE INICIO */
     #portal-view {
       flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 24px 18px;
       background-color: var(--fondo-claro);
-      background-image: radial-gradient(circle at top right, rgba(188, 149, 92, 0.14), transparent 50%),
-                        radial-gradient(circle at bottom left, rgba(105, 28, 50, 0.09), transparent 50%);
+      background-image: radial-gradient(circle at top right, rgba(221, 201, 163, 0.28), transparent 50%),
+                        radial-gradient(circle at bottom left, rgba(171, 0, 51, 0.07), transparent 50%);
     }
     .portal-grid {
       max-width: 1240px; width: 100%; margin: auto; display: grid;
@@ -69,34 +76,34 @@
     .hero-congreso {
       display: flex; align-items: center; gap: 24px; margin-bottom: 18px;
       background: #FFFFFF; padding: 22px; border-radius: 14px;
-      border: 1px solid #E2E8F0; border-left: 5px solid var(--guinda);
-      box-shadow: 0 6px 20px rgba(56, 10, 23, 0.06);
+      border: 1px solid #E5E7EB; border-left: 5px solid var(--guinda);
+      box-shadow: 0 6px 20px rgba(84, 86, 90, 0.08);
     }
     .congreso-logo-grande {
       flex-shrink: 0; width: 205px; height: 205px; display: flex; align-items: center; justify-content: center;
-      background: #F4F4F6; border-radius: 12px; padding: 10px; border: 1px solid #E2E8F0;
+      background: #FAFAFA; border-radius: 12px; padding: 10px; border: 1px solid var(--arena);
     }
     .congreso-logo-grande img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
 
     .tag-vivo {
-      display: inline-flex; align-items: center; gap: 8px; background: var(--oro-suave); color: var(--guinda);
+      display: inline-flex; align-items: center; gap: 8px; background: var(--arena-claro); color: var(--guinda);
       font-weight: 700; font-size: 11.5px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--oro); margin-bottom: 10px;
     }
     .dot-pulse { width: 8px; height: 8px; background: var(--guinda); border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    .hero-texto h2 { font-size: 25px; font-weight: 700; color: var(--guinda-oscuro); line-height: 1.22; margin-bottom: 8px; }
-    .hero-texto .lema { font-size: 14px; font-style: italic; font-weight: 600; color: #8A6B3E; margin-bottom: 8px; }
-    .hero-texto p { font-size: 13.5px; color: var(--texto-gris); line-height: 1.5; }
+    .hero-texto h2 { font-size: 25px; font-weight: 700; color: var(--guinda); line-height: 1.22; margin-bottom: 8px; }
+    .hero-texto .lema { font-size: 14px; font-style: italic; font-weight: 600; color: var(--oro); margin-bottom: 8px; }
+    .hero-texto p { font-size: 13.5px; color: var(--gris-institucional); line-height: 1.5; }
 
     /* RECUADRO INSTITUCIONES CONVOCANTES */
     .instituciones-strip {
       background: #FFFFFF; border-radius: 14px; padding: 18px 24px; border: 1.5px solid var(--oro);
-      box-shadow: 0 4px 16px rgba(56, 10, 23, 0.06);
+      box-shadow: 0 4px 16px rgba(84, 86, 90, 0.07);
     }
     .instituciones-label {
       font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
-      color: var(--guinda); margin-bottom: 14px; display: block;
+      color: var(--gris-institucional); margin-bottom: 14px; display: block;
     }
     .instituciones-logos {
       display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
@@ -112,39 +119,39 @@
     }
     .cta-buttons-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .btn-secundario {
-      display: inline-flex; align-items: center; gap: 8px; background: var(--oro-crema); color: var(--guinda); border: 1.5px solid var(--oro);
+      display: inline-flex; align-items: center; gap: 8px; background: var(--arena-claro); color: var(--guinda); border: 1.5px solid var(--oro);
       padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
     }
-    .btn-secundario:hover { background: var(--oro); color: var(--fondo-oscuro); }
+    .btn-secundario:hover { background: var(--arena); color: var(--guinda-oscuro); }
     .btn-programa-portal {
-      display: inline-flex; align-items: center; gap: 8px; background: #FFFFFF; color: var(--guinda-oscuro); border: 1.5px solid var(--guinda);
+      display: inline-flex; align-items: center; gap: 8px; background: #FFFFFF; color: var(--gris-institucional); border: 1.5px solid var(--gris-institucional);
       padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
     }
-    .btn-programa-portal:hover { background: var(--guinda); color: #FFFFFF; }
+    .btn-programa-portal:hover { background: var(--gris-institucional); color: #FFFFFF; }
 
     /* TARJETA LOGIN */
     .login-card {
       background: #FFFFFF; border-radius: 14px; padding: 32px 28px;
-      box-shadow: 0 12px 32px rgba(56, 10, 23, 0.12); border-top: 5px solid var(--guinda);
+      box-shadow: 0 12px 32px rgba(84, 86, 90, 0.12); border-top: 5px solid var(--guinda);
       display: flex; flex-direction: column; justify-content: center; height: 100%;
     }
-    .login-card h3 { font-size: 21px; font-weight: 700; color: var(--guinda-oscuro); margin-bottom: 6px; }
-    .login-card .sub { font-size: 13.5px; color: var(--texto-gris); margin-bottom: 24px; }
+    .login-card h3 { font-size: 21px; font-weight: 700; color: var(--guinda); margin-bottom: 6px; }
+    .login-card .sub { font-size: 13.5px; color: var(--gris-institucional); margin-bottom: 24px; }
 
     .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--texto-oscuro); margin-bottom: 6px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--gris-institucional); margin-bottom: 6px; }
     .input-wrap { position: relative; display: flex; align-items: center; }
-    .form-group input { width: 100%; padding: 13px 42px 13px 14px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-size: 14px; }
+    .form-group input { width: 100%; padding: 13px 42px 13px 14px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-size: 14px; color: var(--texto-oscuro); }
     .form-group input:focus { outline: none; border-color: var(--guinda); }
     .toggle-pass {
-      position: absolute; right: 10px; background: none; border: none; color: var(--texto-gris);
+      position: absolute; right: 10px; background: none; border: none; color: var(--gris-institucional);
       cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;
     }
     .toggle-pass:hover { color: var(--guinda); }
 
     .btn-ingresar {
       width: 100%; padding: 14px; background: linear-gradient(135deg, var(--guinda) 0%, var(--guinda-oscuro) 100%);
-      color: #FFFFFF; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px;
+      color: #FFFFFF; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px; transition: 0.2s;
     }
     .btn-ingresar:hover { background: linear-gradient(135deg, var(--guinda-claro) 0%, var(--guinda) 100%); }
     .btn-ingresar:disabled { opacity: 0.65; cursor: not-allowed; }
@@ -152,30 +159,30 @@
     #error-msg { display: none; margin-top: 14px; padding: 10px 12px; background: var(--error-bg); color: var(--error-txt); border-radius: 6px; font-size: 13px; font-weight: 500; text-align: center; }
 
     .portal-footer-logos {
-      max-width: 1240px; width: 100%; margin: 18px auto 0; padding-top: 12px; border-top: 1px solid #E2E8F0;
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--texto-gris);
+      max-width: 1240px; width: 100%; margin: 18px auto 0; padding-top: 12px; border-top: 1px solid var(--arena);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--gris-institucional);
     }
 
     /* VISTA DE TRANSMISIÓN ADAPTATIVA */
     #stream-view {
-      display: none; flex: 1; height: calc(100vh - 94px); min-height: 540px; width: 100%; background: var(--fondo-oscuro); flex-direction: column;
+      display: none; flex: 1; height: calc(100vh - 94px); min-height: 540px; width: 100%; background: var(--gris-oscuro); flex-direction: column;
     }
     .stream-subbar {
-      background: #1E0A14; border-bottom: 1.5px solid rgba(188, 149, 92, 0.45); padding: 7px 24px;
+      background: var(--gris-institucional); border-bottom: 1.5px solid var(--oro); padding: 7px 24px;
       display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-shrink: 0; flex-wrap: wrap;
     }
-    .subbar-info { display: flex; align-items: center; gap: 10px; color: #FFF; }
-    .subbar-badge { background: var(--guinda); border: 1px solid var(--oro); color: var(--oro-crema); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 4px; }
-    .subbar-title { font-size: 13px; font-weight: 600; color: var(--oro-crema); }
+    .subbar-info { display: flex; align-items: center; gap: 10px; color: #FFFFFF; }
+    .subbar-badge { background: var(--guinda); border: 1px solid var(--arena); color: #FFFFFF; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 4px; }
+    .subbar-title { font-size: 13px; font-weight: 600; color: var(--arena); }
     
     .subbar-logos { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .subbar-logo-light {
-      background: #FFFFFF; padding: 3px 8px; border-radius: 5px; height: 34px; border: 1px solid rgba(188,149,92,0.4);
+      background: #FFFFFF; padding: 3px 8px; border-radius: 5px; height: 34px; border: 1px solid var(--oro);
       display: flex; align-items: center; justify-content: center;
     }
     .subbar-logo-light img { max-height: 26px; width: auto; display: block; }
     .timer-badge {
-      font-size: 12px; font-weight: 600; color: var(--oro-suave); background: rgba(105, 28, 50, 0.55); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(188,149,92,0.45);
+      font-size: 12px; font-weight: 600; color: #FFFFFF; background: var(--guinda-oscuro); padding: 5px 10px; border-radius: 6px; border: 1px solid var(--oro);
     }
 
     .stream-stage {
@@ -187,51 +194,51 @@
     /* CONTENEDOR DE CHAT CON CUBIERTA INFERIOR */
     #chat-wrapper {
       width: 380px; flex-shrink: 0; min-height: 0; border-left: 2px solid var(--guinda);
-      background: #0F0F0F; position: relative; display: flex; flex-direction: column; overflow: hidden;
+      background: #141517; position: relative; display: flex; flex-direction: column; overflow: hidden;
     }
     .chat-topbar {
-      background: #1E0A14; padding: 8px 14px; border-bottom: 1px solid var(--guinda);
+      background: var(--gris-institucional); padding: 8px 14px; border-bottom: 1px solid var(--oro);
       display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 5;
     }
-    .chat-topbar span { font-size: 12px; color: var(--oro-suave); font-weight: 600; }
+    .chat-topbar span { font-size: 12px; color: var(--arena); font-weight: 600; }
     #yt-chat { flex: 1; width: 100%; border: none; }
     
     .chat-bottom-cover {
       position: absolute; bottom: 0; left: 0; right: 0; height: 92px;
-      background: linear-gradient(180deg, #16070E 0%, #1E0A14 100%);
+      background: linear-gradient(180deg, var(--gris-oscuro) 0%, var(--gris-institucional) 100%);
       border-top: 1.5px solid var(--oro);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       padding: 10px 16px; gap: 6px; z-index: 10;
     }
     .btn-chat-comentar {
       width: 100%; background: linear-gradient(135deg, var(--guinda) 0%, var(--guinda-oscuro) 100%);
-      color: var(--oro-crema); border: 1.5px solid var(--oro); border-radius: 22px;
+      color: #FFFFFF; border: 1.5px solid var(--oro); border-radius: 22px;
       padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
     }
-    .btn-chat-comentar:hover { background: var(--oro); color: var(--fondo-oscuro); }
-    .chat-bottom-hint { font-size: 11px; color: #CBD5E1; text-align: center; }
+    .btn-chat-comentar:hover { background: var(--oro); color: #FFFFFF; }
+    .chat-bottom-hint { font-size: 11px; color: var(--arena); text-align: center; }
 
     /* MODALES */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30, 10, 20, 0.80); z-index: 50; justify-content: center; align-items: center; padding: 20px; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(46, 48, 51, 0.82); z-index: 50; justify-content: center; align-items: center; padding: 20px; }
     .modal-content { background: #FFFFFF; width: 100%; max-width: 680px; height: 85vh; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; border-top: 5px solid var(--oro); }
     .modal-content.modal-lg { max-width: 960px; height: 88vh; }
     .modal-content.modal-sm { height: auto; max-width: 480px; }
-    .modal-header { background: var(--guinda); color: #FFF; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .modal-header { background: var(--guinda); color: #FFFFFF; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
     .modal-header-actions { display: flex; align-items: center; gap: 12px; }
     .btn-pdf-externo {
-      background: var(--oro); color: var(--fondo-oscuro); text-decoration: none; font-size: 12px;
+      background: var(--oro); color: #FFFFFF; text-decoration: none; font-size: 12px;
       font-weight: 700; padding: 6px 12px; border-radius: 6px; transition: 0.2s;
     }
-    .btn-pdf-externo:hover { background: var(--oro-crema); }
-    .close-modal { background: none; border: none; color: var(--oro-crema); font-size: 24px; cursor: pointer; line-height: 1; }
+    .btn-pdf-externo:hover { background: var(--arena); color: var(--guinda-oscuro); }
+    .close-modal { background: none; border: none; color: var(--arena); font-size: 24px; cursor: pointer; line-height: 1; }
     .modal-body { flex: 1; background: #F1F5F9; }
     .modal-body iframe { width: 100%; height: 100%; border: none; }
     .constancia-box { padding: 24px; text-align: center; }
-    .constancia-box p { font-size: 14px; color: var(--texto-gris); margin-bottom: 16px; line-height: 1.55; }
+    .constancia-box p { font-size: 14px; color: var(--gris-institucional); margin-bottom: 16px; line-height: 1.55; }
     .status-pill { display: inline-block; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 18px; }
     .status-ok { background: var(--ok-bg); color: var(--ok-txt); }
-    .status-wait { background: var(--oro-suave); color: var(--guinda); }
+    .status-wait { background: var(--arena-claro); color: var(--guinda); border: 1px solid var(--oro); }
 
     @media (max-width: 1024px) {
       header { padding: 14px 18px; }
@@ -253,7 +260,7 @@
   <header>
     <div class="brand">
       <div class="brand-logo-box">
-        <img src="img/usjt.png" alt="USJT" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2234%22><rect width=%2284%22 height=%2234%22 rx=%224%22 fill=%22%23691C32%22/><text x=%2242%22 y=%2222%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2215%22 fill=%22%23BC955C%22 text-anchor=%22middle%22>USJT</text></svg>';">
+        <img src="img/usjt.png" alt="USJT" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2234%22><rect width=%2284%22 height=%2234%22 rx=%224%22 fill=%22%23AB0033%22/><text x=%2242%22 y=%2222%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2215%22 fill=%22%23BC955C%22 text-anchor=%22middle%22>USJT</text></svg>';">
       </div>
       <div class="brand-title">
         <h1>Congreso de Seguridad Pública</h1>
@@ -277,7 +284,7 @@
         <!-- LOGO DEL CONGRESO EN GRANDE + TÍTULO OFICIAL -->
         <div class="hero-congreso">
           <div class="congreso-logo-grande">
-            <img src="img/congreso.png" alt="Congreso de Seguridad Pública" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22><rect width=%22160%22 height=%22160%22 rx=%2210%22 fill=%22%23F5EDD8%22/><text x=%2280%22 y=%2284%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2213%22 fill=%22%23691C32%22 text-anchor=%22middle%22>CONGRESO</text></svg>';">
+            <img src="img/congreso.png" alt="Congreso de Seguridad Pública" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22><rect width=%22160%22 height=%22160%22 rx=%2210%22 fill=%22%23DDC9A3%22/><text x=%2280%22 y=%2284%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2213%22 fill=%22%23AB0033%22 text-anchor=%22middle%22>CONGRESO</text></svg>';">
           </div>
           <div class="hero-texto">
             <div class="tag-vivo"><span class="dot-pulse"></span> TRANSMISIÓN EN DIRECTO</div>
@@ -328,7 +335,7 @@
         <button type="button" class="btn-secundario" onclick="abrirModalRegistro()">¿Aún no tienes clave? Regístrate aquí</button>
         <button type="button" class="btn-programa-portal" onclick="abrirModalPrograma()">📄 Consultar Programa del Congreso</button>
       </div>
-      <span style="font-size: 13px; color: var(--texto-gris); font-weight: 600;">Del 23 al 26 de noviembre de 2026 • Modalidad Híbrida</span>
+      <span style="font-size: 13px; color: var(--gris-institucional); font-weight: 600;">Del 23 al 26 de noviembre de 2026 • Modalidad Híbrida</span>
     </div>
 
     <div class="portal-footer-logos">
@@ -416,7 +423,7 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbw71Cov1mWq1lUfp7kI7shqCYCq9IB2mNzhqyl4beexLkczGK8L7R9C0-sPqgTUqKnlvw/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyntk1gVMKzaM36iv4gDu1FM70p33FRwIIh_jAAO_X2YBKJ_eDx9-GXURy28VoP65xYDg/exec';
 
     let sesionActiva = null;
     let segundosPendientes = 0;
@@ -707,7 +714,6 @@
         let fontSizeNombre = 22;
         let anchoTexto = fontBold.widthOfTextAtSize(nombreTexto, fontSizeNombre);
 
-        // Ajusta automáticamente el tamaño si el nombre es muy largo
         const anchoMaximo = width - 80;
         while (anchoTexto > anchoMaximo && fontSizeNombre > 13) {
           fontSizeNombre -= 1;
@@ -715,14 +721,14 @@
         }
 
         const posXNombre = (width - anchoTexto) / 2;
-        const posYNombre = height * 0.50; // Mitad vertical de la hoja (ajustable si requieres subirlo/bajarlo)
+        const posYNombre = height * 0.50;
 
         primeraPagina.drawText(nombreTexto, {
           x: posXNombre,
           y: posYNombre,
           size: fontSizeNombre,
           font: fontBold,
-          color: rgb(0.41, 0.11, 0.20) // Guinda institucional (#691C32)
+          color: rgb(0.67, 0.00, 0.20) // Guinda oficial #AB0033
         });
 
         // Folio de verificación en la parte inferior
@@ -735,7 +741,7 @@
           y: 28,
           size: fontSizeFolio,
           font: fontRegular,
-          color: rgb(0.35, 0.35, 0.35)
+          color: rgb(0.33, 0.34, 0.35) // Gris oficial #54565A
         });
 
         const pdfFinalBytes = await pdfDoc.save();
