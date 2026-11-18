@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aula Virtual y Transmisiones en Vivo | USJT</title>
+  <title>8° Congreso Internacional de Seguridad y Proximidad Social | USJT</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Librería ligera para generar PDF de constancia en el navegador sin cargar el servidor -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
@@ -23,17 +22,17 @@
     /* CINTILLA SUPERIOR AMPLIADA */
     header {
       background: linear-gradient(90deg, var(--fondo-oscuro) 0%, var(--guinda) 100%);
-      color: #FFFFFF; padding: 20px 32px; display: flex; justify-content: space-between; align-items: center;
+      color: #FFFFFF; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center;
       border-bottom: 4px solid var(--oro); box-shadow: 0 4px 14px rgba(56, 10, 23, 0.28); z-index: 20; flex-shrink: 0; gap: 16px;
     }
     .brand { display: flex; align-items: center; gap: 16px; }
     .brand-logo-box {
-      background: rgba(255,255,255,0.95); padding: 6px 12px; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center; height: 48px; border: 1.5px solid var(--oro);
+      background: #FFFFFF; padding: 6px 14px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; height: 54px; border: 1.5px solid var(--oro);
     }
-    .brand-logo-box img { max-height: 36px; width: auto; display: block; }
-    .brand-title h1 { font-size: 19px; font-weight: 700; letter-spacing: -0.2px; }
-    .brand-title span { font-size: 13px; color: var(--oro-suave); display: block; margin-top: 2px; }
+    .brand-logo-box img { max-height: 42px; width: auto; display: block; }
+    .brand-title h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.2px; }
+    .brand-title span { font-size: 12.5px; color: var(--oro-suave); display: block; margin-top: 2px; }
 
     .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .user-pill {
@@ -52,40 +51,56 @@
 
     /* VISTA PORTAL DE INICIO */
     #portal-view {
-      flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 32px 24px 20px;
+      flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 28px 24px 18px;
       background: radial-gradient(circle at top right, rgba(188, 149, 92, 0.14), transparent 50%),
                   radial-gradient(circle at bottom left, rgba(105, 28, 50, 0.09), transparent 50%);
       overflow-y: auto;
     }
-    .portal-grid { max-width: 1080px; width: 100%; margin: auto; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; align-items: center; }
+    .portal-grid { max-width: 1120px; width: 100%; margin: auto; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: center; }
 
-    /* LOGOS EN INTERFAZ DE INICIO */
-    .logos-portal-bar {
-      display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 18px;
+    /* BLOQUE PROTAGONISTA DEL LOGO DEL CONGRESO EN GRANDE */
+    .hero-congreso {
+      display: flex; align-items: center; gap: 24px; margin-bottom: 20px;
+      background: #FFFFFF; padding: 20px; border-radius: 14px;
+      border: 1px solid #E2E8F0; border-left: 5px solid var(--guinda);
+      box-shadow: 0 6px 20px rgba(56, 10, 23, 0.06);
     }
-    .logo-chip {
-      background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 8px 14px;
-      height: 58px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    .congreso-logo-grande {
+      flex-shrink: 0; width: 195px; height: 195px; display: flex; align-items: center; justify-content: center;
+      background: #F4F4F6; border-radius: 12px; padding: 10px; border: 1px solid #E2E8F0;
     }
-    .logo-chip img { max-height: 42px; width: auto; display: block; }
+    .congreso-logo-grande img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
 
     .tag-vivo {
       display: inline-flex; align-items: center; gap: 8px; background: var(--oro-suave); color: var(--guinda);
-      font-weight: 700; font-size: 12px; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--oro); margin-bottom: 14px;
+      font-weight: 700; font-size: 11.5px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--oro); margin-bottom: 10px;
     }
     .dot-pulse { width: 8px; height: 8px; background: var(--guinda); border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    .event-info h2 { font-size: 31px; color: var(--guinda-oscuro); line-height: 1.2; margin-bottom: 14px; }
-    .event-info p { font-size: 15px; color: var(--texto-gris); line-height: 1.6; margin-bottom: 22px; }
+    .hero-texto h2 { font-size: 24px; color: var(--guinda-oscuro); line-height: 1.22; margin-bottom: 8px; }
+    .hero-texto .lema { font-size: 13.5px; font-style: italic; font-weight: 600; color: #8A6B3E; margin-bottom: 8px; }
+    .hero-texto p { font-size: 13.5px; color: var(--texto-gris); line-height: 1.5; }
 
-    .event-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px; }
-    .meta-card { background: #FFFFFF; border-left: 4px solid var(--oro); padding: 12px 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-    .meta-card strong { display: block; font-size: 11.5px; color: var(--guinda); text-transform: uppercase; margin-bottom: 3px; }
-    .meta-card span { font-size: 14px; font-weight: 500; color: var(--texto-oscuro); }
+    /* CINTILLA DE INSTITUCIONES CONVOCANTES */
+    .instituciones-strip {
+      background: #FFFFFF; border-radius: 12px; padding: 14px 18px; border: 1px solid #E2E8F0;
+      margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .instituciones-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--texto-gris); margin-bottom: 10px; display: block;
+    }
+    .instituciones-logos {
+      display: flex; align-items: center; justify-content: space-around; gap: 18px; flex-wrap: wrap;
+    }
+    .instituciones-logos img {
+      height: 52px; width: auto; max-width: 190px; object-fit: contain; display: block;
+    }
 
+    .portal-cta-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
     .btn-secundario {
-      display: inline-block; background: var(--oro-crema); color: var(--guinda); border: 1px solid var(--oro);
+      display: inline-block; background: var(--oro-crema); color: var(--guinda); border: 1.5px solid var(--oro);
       padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
     }
     .btn-secundario:hover { background: var(--oro); color: var(--fondo-oscuro); }
@@ -116,25 +131,30 @@
     #error-msg { display: none; margin-top: 14px; padding: 10px 12px; background: var(--error-bg); color: var(--error-txt); border-radius: 6px; font-size: 13px; font-weight: 500; text-align: center; }
 
     .portal-footer-logos {
-      max-width: 1080px; width: 100%; margin: 24px auto 0; padding-top: 14px; border-top: 1px solid #E2E8F0;
+      max-width: 1120px; width: 100%; margin: 20px auto 0; padding-top: 12px; border-top: 1px solid #E2E8F0;
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--texto-gris);
     }
 
-    /* VISTA DE TRANSMISIÓN ADAPTATIVA (CON SUB-CINTILLA SIN RECORTAR VIDEO) */
+    /* VISTA DE TRANSMISIÓN ADAPTATIVA */
     #stream-view {
       display: none; flex: 1; min-height: 0; width: 100%; background: var(--fondo-oscuro); flex-direction: column;
     }
     .stream-subbar {
-      background: #2A0E1B; border-bottom: 1.5px solid rgba(188, 149, 92, 0.45); padding: 8px 24px;
-      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-shrink: 0; flex-wrap: wrap;
+      background: #2A0E1B; border-bottom: 1.5px solid rgba(188, 149, 92, 0.45); padding: 7px 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-shrink: 0; flex-wrap: wrap;
     }
-    .subbar-info { display: flex; align-items: center; gap: 12px; color: #FFF; }
+    .subbar-info { display: flex; align-items: center; gap: 10px; color: #FFF; }
     .subbar-badge { background: var(--guinda); border: 1px solid var(--oro); color: var(--oro-crema); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 4px; }
-    .subbar-title { font-size: 13.5px; font-weight: 600; color: var(--oro-crema); }
-    .subbar-logos { display: flex; align-items: center; gap: 10px; }
-    .subbar-logos img { height: 28px; width: auto; background: #FFF; padding: 3px 7px; border-radius: 5px; }
+    .subbar-title { font-size: 13px; font-weight: 600; color: var(--oro-crema); }
+    
+    .subbar-logos { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .subbar-logo-pill {
+      background: #FFFFFF; padding: 3px 8px; border-radius: 5px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .subbar-logo-pill img { max-height: 24px; width: auto; display: block; }
     .timer-badge {
-      font-size: 12px; color: var(--oro-suave); background: rgba(0,0,0,0.35); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(188,149,92,0.3);
+      font-size: 12px; color: var(--oro-suave); background: rgba(0,0,0,0.4); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(188,149,92,0.35);
     }
 
     .stream-stage {
@@ -144,7 +164,7 @@
     #chat-wrapper { width: 380px; flex-shrink: 0; min-height: 0; border-left: 2px solid var(--guinda); background: #14070D; position: relative; }
     #video-wrapper iframe, #chat-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
-    /* MODALES (REGISTRO Y CONSTANCIA) */
+    /* MODALES */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30, 10, 20, 0.78); z-index: 50; justify-content: center; align-items: center; padding: 20px; }
     .modal-content { background: #FFFFFF; width: 100%; max-width: 680px; height: 85vh; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; border-top: 5px solid var(--oro); }
     .modal-content.modal-sm { height: auto; max-width: 480px; }
@@ -163,6 +183,8 @@
       header { padding: 14px 18px; }
       .brand-title h1 { font-size: 16px; }
       .portal-grid { grid-template-columns: 1fr; gap: 24px; }
+      .hero-congreso { flex-direction: column; text-align: center; }
+      .congreso-logo-grande { width: 170px; height: 170px; }
       #stream-view { height: auto; }
       .stream-stage { flex-direction: column; }
       #video-wrapper { width: 100%; aspect-ratio: 16 / 9; min-height: 230px; max-height: 55vh; }
@@ -175,11 +197,11 @@
   <header>
     <div class="brand">
       <div class="brand-logo-box">
-        <img src="img/logo-usjt.png" alt="USJT" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2234%22><rect width=%2284%22 height=%2234%22 rx=%224%22 fill=%22%23691C32%22/><text x=%2242%22 y=%2222%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2215%22 fill=%22%23BC955C%22 text-anchor=%22middle%22>USJT</text></svg>';">
+        <img src="img/usjt.png" alt="USJT" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2234%22><rect width=%2284%22 height=%2234%22 rx=%224%22 fill=%22%23691C32%22/><text x=%2242%22 y=%2222%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2215%22 fill=%22%23BC955C%22 text-anchor=%22middle%22>USJT</text></svg>';">
       </div>
       <div class="brand-title">
         <h1>Aula Virtual y Transmisiones en Vivo</h1>
-        <span>Plataforma Institucional de Educación Continua</span>
+        <span>Universidad de Seguridad y Justicia de Tamaulipas</span>
       </div>
     </div>
 
@@ -195,34 +217,33 @@
   <main id="portal-view">
     <div class="portal-grid">
       <section class="event-info">
-        <!-- LOGOS DEL CONGRESO E INSTITUCIONES PARTICIPANTES -->
-        <div class="logos-portal-bar">
-          <div class="logo-chip">
-            <img src="img/logo-congreso.png" alt="Logo Congreso" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%2238%22><rect width=%22140%22 height=%2238%22 rx=%225%22 fill=%22%23F5EDD8%22/><text x=%2270%22 y=%2223%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2212%22 fill=%22%23691C32%22 text-anchor=%22middle%22>LOGO CONGRESO</text></svg>';">
+        <!-- LOGO DEL CONGRESO EN GRANDE + TÍTULO OFICIAL -->
+        <div class="hero-congreso">
+          <div class="congreso-logo-grande">
+            <img src="img/congreso.png" alt="8° Congreso Internacional de Seguridad y Proximidad Social" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22><rect width=%22160%22 height=%22160%22 rx=%2210%22 fill=%22%23F5EDD8%22/><text x=%2280%22 y=%2284%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2213%22 fill=%22%23691C32%22 text-anchor=%22middle%22>8° CONGRESO</text></svg>';">
           </div>
-          <div class="logo-chip">
-            <img src="img/logo-institucion-1.png" alt="Institución 1" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22130%22 height=%2238%22><rect width=%22130%22 height=%2238%22 rx=%225%22 fill=%22%23F1F5F9%22/><text x=%2265%22 y=%2223%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2211%22 fill=%22%23475569%22 text-anchor=%22middle%22>INSTITUCIÓN 1</text></svg>';">
-          </div>
-          <div class="logo-chip">
-            <img src="img/logo-institucion-2.png" alt="Institución 2" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22130%22 height=%2238%22><rect width=%22130%22 height=%2238%22 rx=%225%22 fill=%22%23F1F5F9%22/><text x=%2265%22 y=%2223%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2211%22 fill=%22%23475569%22 text-anchor=%22middle%22>INSTITUCIÓN 2</text></svg>';">
+          <div class="hero-texto">
+            <div class="tag-vivo"><span class="dot-pulse"></span> TRANSMISIÓN EN DIRECTO</div>
+            <h2>8° Congreso Internacional de Seguridad y Proximidad Social</h2>
+            <div class="lema">“De la proximidad a la paz: estrategias que funcionan”</div>
+            <p>Ingresa con el usuario y contraseña enviados a tu correo para acceder a la sala en vivo y registrar automáticamente tu asistencia para constancia.</p>
           </div>
         </div>
 
-        <div class="tag-vivo"><span class="dot-pulse"></span> TRANSMISIÓN EN DIRECTO</div>
-        <h2>Congreso Internacional y Conferencias Magistrales</h2>
-        <p>Bienvenido a la sala oficial de transmisión. Para ingresar al aula y registrar tu asistencia automática para constancia, utiliza el usuario y contraseña enviados a tu correo electrónico.</p>
-        
-        <div class="event-meta">
-          <div class="meta-card">
-            <strong>Modalidad</strong>
-            <span>En vivo (Streaming + Chat)</span>
-          </div>
-          <div class="meta-card">
-            <strong>Acreditación</strong>
-            <span>Conteo automático de asistencia</span>
+        <!-- CINTILLA DE INSTITUCIONES PARTICIPANTES -->
+        <div class="instituciones-strip">
+          <span class="instituciones-label">Instituciones Convocantes y Participantes</span>
+          <div class="instituciones-logos">
+            <img src="img/tam.png" alt="Tamaulipas Gobierno del Estado" onerror="this.style.display='none'">
+            <img src="img/usjt.png" alt="Universidad de Seguridad y Justicia de Tamaulipas" onerror="this.style.display='none'">
+            <img src="img/unam.png" alt="Universidad Nacional Autónoma de México" onerror="this.style.display='none'">
           </div>
         </div>
-        <button type="button" class="btn-secundario" onclick="abrirModalRegistro()">¿Aún no tienes clave? Regístrate aquí</button>
+
+        <div class="portal-cta-row">
+          <button type="button" class="btn-secundario" onclick="abrirModalRegistro()">¿Aún no tienes clave? Regístrate aquí</button>
+          <span style="font-size: 12.5px; color: var(--texto-gris);">6 y 7 de agosto de 2026 • Modalidad Virtual</span>
+        </div>
       </section>
 
       <section class="login-card">
@@ -251,7 +272,7 @@
 
     <div class="portal-footer-logos">
       <span>Universidad de Seguridad y Justicia de Tamaulipas • Plataforma Institucional</span>
-      <span>Soporte compatible con Safari, iOS, Android y Chrome</span>
+      <span>Compatible con Safari, iOS, Android y Chrome</span>
     </div>
   </main>
 
@@ -260,12 +281,14 @@
     <div class="stream-subbar">
       <div class="subbar-info">
         <span class="subbar-badge" id="lbl-sesion-activa">EN VIVO</span>
-        <span class="subbar-title">Congreso Institucional USJT — Sala Principal</span>
+        <span class="subbar-title">8° Congreso Internacional de Seguridad y Proximidad Social</span>
       </div>
       <div class="subbar-logos">
         <span class="timer-badge" id="lbl-tiempo-sesion">⏱ Tiempo en sala: 0 min</span>
-        <img src="img/logo-congreso.png" alt="Congreso" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2295%22 height=%2224%22><text x=%2247%22 y=%2216%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2210%22 fill=%22%23691C32%22 text-anchor=%22middle%22>CONGRESO</text></svg>';">
-        <img src="img/logo-institucion-1.png" alt="Aliado 1" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2285%22 height=%2224%22><text x=%2242%22 y=%2216%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2210%22 fill=%22%23475569%22 text-anchor=%22middle%22>ALIADO 1</text></svg>';">
+        <div class="subbar-logo-pill"><img src="img/congreso.png" alt="Congreso" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-pill"><img src="img/tam.png" alt="Tamaulipas" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-pill"><img src="img/usjt.png" alt="USJT" onerror="this.parentElement.style.display='none'"></div>
+        <div class="subbar-logo-pill"><img src="img/unam.png" alt="UNAM" onerror="this.parentElement.style.display='none'"></div>
       </div>
     </div>
 
@@ -283,7 +306,7 @@
   <div id="modal-registro" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h4>Registro de Asistencia — USJT</h4>
+        <h4>Registro de Asistencia — 8° Congreso USJT</h4>
         <button type="button" class="close-modal" onclick="cerrarModalRegistro()">&times;</button>
       </div>
       <div class="modal-body">
@@ -422,14 +445,13 @@
       btn.textContent = 'Entrar a la Transmisión';
     }
 
-    // CONTADOR CALIBRADO PARA 1,000 USUARIOS + RESPALDO EN LOCALSTORAGE
+    // CONTADOR CALIBRADO PARA 1,000 USUARIOS + KEEPALIVE COMPATIBLE CON SAFARI/APPS SCRIPT
     function iniciarConteoTiempo() {
       const claveRespaldo = `usjt_pendiente_${sesionActiva.usuario}`;
       segundosPendientes = Number(localStorage.getItem(claveRespaldo)) || 0;
       segundosTotalesLocales = segundosPendientes;
 
-      // Primer pulso escalonado entre 2 y 8 minutos para evitar picos al inicio
-      const primerPulso = Math.floor(120000 + Math.random() * 360000);
+      const primerPulso = Math.floor(15000 + Math.random() * 45000);
       timeoutHeartbeat = setTimeout(cicloHeartbeat, primerPulso);
 
       intervaloContador = setInterval(() => {
@@ -446,13 +468,12 @@
     function cicloHeartbeat() {
       if (!sesionActiva) return;
       enviarHeartbeat(false);
-      // Siguiente envío escalonado aleatoriamente entre 10 y 15 minutos
       const siguienteIntervalo = Math.floor(600000 + Math.random() * 300000);
       timeoutHeartbeat = setTimeout(cicloHeartbeat, siguienteIntervalo);
     }
 
-    function enviarHeartbeat(usarBeacon) {
-      if (!sesionActiva || segundosPendientes < 10) return;
+    function enviarHeartbeat(alSalir) {
+      if (!sesionActiva || segundosPendientes < 5) return;
       const usuarioActual = sesionActiva.usuario;
       const claveRespaldo = `usjt_pendiente_${usuarioActual}`;
       const envio = segundosPendientes;
@@ -466,26 +487,22 @@
         segundos: envio
       });
 
-      if (usarBeacon && navigator.sendBeacon) {
-        const enviado = navigator.sendBeacon(API_URL, payload);
-        if (!enviado) {
+      fetch(API_URL, {
+        method: 'POST',
+        body: payload,
+        keepalive: alSalir
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res && res.retry) {
           segundosPendientes += envio;
           localStorage.setItem(claveRespaldo, segundosPendientes);
         }
-      } else {
-        fetch(API_URL, { method: 'POST', body: payload })
-          .then(r => r.json())
-          .then(res => {
-            if (res && res.retry) {
-              segundosPendientes += envio;
-              localStorage.setItem(claveRespaldo, segundosPendientes);
-            }
-          })
-          .catch(() => {
-            segundosPendientes += envio;
-            localStorage.setItem(claveRespaldo, segundosPendientes);
-          });
-      }
+      })
+      .catch(() => {
+        segundosPendientes += envio;
+        localStorage.setItem(claveRespaldo, segundosPendientes);
+      });
     }
 
     function detenerConteoTiempo() {
@@ -571,9 +588,9 @@
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
       doc.setTextColor(30, 41, 59);
-      doc.text(`Por su asistencia y participación en: "${sesionActiva.sesion}"`, 139.5, 124, { align: 'center' });
+      doc.text(`Por su participación en el 8° Congreso Internacional de Seguridad y Proximidad Social (${sesionActiva.sesion})`, 139.5, 124, { align: 'center' });
 
-      const folio = `USJT-${sesionActiva.usuario.toUpperCase()}-${new Date().getFullYear()}`;
+      const folio = `USJT-8CONGRESO-${sesionActiva.usuario.toUpperCase()}-2026`;
       doc.setFontSize(9);
       doc.setTextColor(100, 116, 139);
       doc.text(`Folio de verificación institucional: ${folio}`, 139.5, 182, { align: 'center' });
