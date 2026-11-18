@@ -217,7 +217,6 @@
   <main id="portal-view">
     <div class="portal-grid">
       <section class="event-info">
-        <!-- LOGO DEL CONGRESO EN GRANDE + TÍTULO OFICIAL -->
         <div class="hero-congreso">
           <div class="congreso-logo-grande">
             <img src="img/congreso.png" alt="8° Congreso Internacional de Seguridad y Proximidad Social" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22><rect width=%22160%22 height=%22160%22 rx=%2210%22 fill=%22%23F5EDD8%22/><text x=%2280%22 y=%2284%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2213%22 fill=%22%23691C32%22 text-anchor=%22middle%22>8° CONGRESO</text></svg>';">
@@ -230,7 +229,6 @@
           </div>
         </div>
 
-        <!-- CINTILLA DE INSTITUCIONES PARTICIPANTES -->
         <div class="instituciones-strip">
           <span class="instituciones-label">Instituciones Convocantes y Participantes</span>
           <div class="instituciones-logos">
@@ -355,9 +353,17 @@
       }
     }
 
-    function abrirModalRegistro() { document.getElementById('modal-registro').style.display = 'flex'; }
-    function cerrarModalRegistro() { document.getElementById('modal-registro').style.display = 'none'; }
-    function cerrarModalConstancia() { document.getElementById('modal-constancia').style.display = 'none'; }
+    function abrirModalRegistro() {
+      document.getElementById('modal-registro').style.display = 'flex';
+    }
+
+    function cerrarModalRegistro() {
+      document.getElementById('modal-registro').style.display = 'none';
+    }
+
+    function cerrarModalConstancia() {
+      document.getElementById('modal-constancia').style.display = 'none';
+    }
 
     function iniciarSesion() {
       const user = document.getElementById('usuario').value;
@@ -445,7 +451,6 @@
       btn.textContent = 'Entrar a la Transmisión';
     }
 
-    // CONTADOR CALIBRADO PARA 1,000 USUARIOS + KEEPALIVE COMPATIBLE CON SAFARI/APPS SCRIPT
     function iniciarConteoTiempo() {
       const claveRespaldo = `usjt_pendiente_${sesionActiva.usuario}`;
       segundosPendientes = Number(localStorage.getItem(claveRespaldo)) || 0;
@@ -563,7 +568,6 @@
       img.src = 'img/plantilla.png?v=' + new Date().getTime();
 
       img.onload = function() {
-        // Detecta automáticamente si tu plantilla es horizontal (landscape) o vertical (portrait)
         const esHorizontal = img.naturalWidth >= img.naturalHeight;
         const doc = new jsPDF({
           orientation: esHorizontal ? 'landscape' : 'portrait',
@@ -575,17 +579,14 @@
         const altoPagina = doc.internal.pageSize.getHeight();
         const centroX = anchoPagina / 2;
 
-        // 1. Dibuja tu plantilla institucional a página completa
         doc.addImage(img, 'PNG', 0, 0, anchoPagina, altoPagina);
 
-        // 2. Estampa el Nombre Completo del participante (ajusta el porcentaje 0.48 si deseas subir o bajar el nombre)
         const posYNombre = altoPagina * 0.48;
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(22);
-        doc.setTextColor(105, 28, 50); // Color guinda institucional
+        doc.setTextColor(105, 28, 50);
         doc.text(sesionActiva.nombre.toUpperCase(), centroX, posYNombre, { align: 'center', maxWidth: anchoPagina - 40 });
 
-        // 3. Estampa el Folio de verificación en la parte inferior
         const folio = `USJT-8CONGRESO-${sesionActiva.usuario.toUpperCase()}-2026`;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
@@ -603,3 +604,6 @@
         btnPdf.textContent = 'Descargar Constancia en PDF';
       };
     }
+  </script>
+</body>
+</html>
