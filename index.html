@@ -553,50 +553,53 @@
     function generarPDFConstancia() {
       if (!sesionActiva || !window.jspdf) return;
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+      const btnPdf = document.getElementById('btn-descargar-pdf');
+      
+      btnPdf.disabled = true;
+      btnPdf.textContent = 'Generando PDF institucional...';
 
-      doc.setDrawColor(105, 28, 50);
-      doc.setLineWidth(3);
-      doc.rect(10, 10, 259, 196);
-      doc.setDrawColor(188, 149, 92);
-      doc.setLineWidth(1);
-      doc.rect(14, 14, 251, 188);
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.src = 'img/plantilla.png?v=' + new Date().getTime();
 
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(16);
-      doc.setTextColor(105, 28, 50);
-      doc.text('UNIVERSIDAD DE SEGURIDAD Y JUSTICIA DE TAMAULIPAS', 139.5, 42, { align: 'center' });
+      img.onload = function() {
+        // Detecta automáticamente si tu plantilla es horizontal (landscape) o vertical (portrait)
+        const esHorizontal = img.naturalWidth >= img.naturalHeight;
+        const doc = new jsPDF({
+          orientation: esHorizontal ? 'landscape' : 'portrait',
+          unit: 'mm',
+          format: 'letter'
+        });
 
-      doc.setFontSize(12);
-      doc.setTextColor(188, 149, 92);
-      doc.text('OTORGA LA PRESENTE', 139.5, 58, { align: 'center' });
+        const anchoPagina = doc.internal.pageSize.getWidth();
+        const altoPagina = doc.internal.pageSize.getHeight();
+        const centroX = anchoPagina / 2;
 
-      doc.setFontSize(28);
-      doc.setTextColor(30, 10, 20);
-      doc.text('CONSTANCIA DE PARTICIPACIÓN', 139.5, 74, { align: 'center' });
+        // 1. Dibuja tu plantilla institucional a página completa
+        doc.addImage(img, 'PNG', 0, 0, anchoPagina, altoPagina);
 
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(13);
-      doc.setTextColor(71, 85, 105);
-      doc.text('A:', 139.5, 92, { align: 'center' });
+        // 2. Estampa el Nombre Completo del participante (ajusta el porcentaje 0.48 si deseas subir o bajar el nombre)
+        const posYNombre = altoPagina * 0.48;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.setTextColor(105, 28, 50); // Color guinda institucional
+        doc.text(sesionActiva.nombre.toUpperCase(), centroX, posYNombre, { align: 'center', maxWidth: anchoPagina - 40 });
 
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(22);
-      doc.setTextColor(105, 28, 50);
-      doc.text(sesionActiva.nombre.toUpperCase(), 139.5, 106, { align: 'center' });
+        // 3. Estampa el Folio de verificación en la parte inferior
+        const folio = `USJT-8CONGRESO-${sesionActiva.usuario.toUpperCase()}-2026`;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(90, 90, 90);
+        doc.text(`Folio de verificación: ${folio}`, centroX, altoPagina - 12, { align: 'center' });
 
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(12);
-      doc.setTextColor(30, 41, 59);
-      doc.text(`Por su participación en el 8° Congreso Internacional de Seguridad y Proximidad Social (${sesionActiva.sesion})`, 139.5, 124, { align: 'center' });
+        doc.save(`Constancia_${sesionActiva.usuario}.pdf`);
+        btnPdf.disabled = false;
+        btnPdf.textContent = 'Descargar Constancia en PDF';
+      };
 
-      const folio = `USJT-8CONGRESO-${sesionActiva.usuario.toUpperCase()}-2026`;
-      doc.setFontSize(9);
-      doc.setTextColor(100, 116, 139);
-      doc.text(`Folio de verificación institucional: ${folio}`, 139.5, 182, { align: 'center' });
-
-      doc.save(`Constancia_${sesionActiva.usuario}.pdf`);
+      img.onerror = function() {
+        alert('No se encontró img/plantilla.png en el repositorio. Verifica que esté dentro de la carpeta img/.');
+        btnPdf.disabled = false;
+        btnPdf.textContent = 'Descargar Constancia en PDF';
+      };
     }
-  </script>
-</body>
-</html>
