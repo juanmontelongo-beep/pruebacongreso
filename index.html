@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Congreso de Seguridad Pública | USJT</title>
   <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <style>
     :root {
       --guinda: #691C32; --guinda-claro: #8B2645; --guinda-oscuro: #4B1122;
@@ -35,22 +35,22 @@
     .brand-title h1 { font-size: 18.5px; font-weight: 700; letter-spacing: -0.2px; }
     .brand-title span { font-size: 12.5px; color: var(--oro-suave); display: block; margin-top: 2px; font-weight: 500; }
 
-    .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .user-pill {
       display: none; align-items: center; gap: 8px; background: rgba(255,255,255,0.12);
       border: 1px solid rgba(188, 149, 92, 0.5); padding: 7px 14px; border-radius: 20px; font-size: 12.5px; color: var(--oro-crema);
     }
-    .btn-registro-top, .btn-salir-top, .btn-constancia-top {
+    .btn-registro-top, .btn-salir-top, .btn-constancia-top, .btn-programa-top {
       background: transparent; border: 1.5px solid var(--oro); color: var(--oro-crema);
-      padding: 9px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
+      padding: 9px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
     }
-    .btn-registro-top:hover { background: var(--oro); color: var(--fondo-oscuro); }
+    .btn-registro-top:hover, .btn-programa-top:hover { background: var(--oro); color: var(--fondo-oscuro); }
     .btn-constancia-top { display: none; background: var(--oro); color: var(--fondo-oscuro); }
     .btn-constancia-top:hover { background: var(--oro-crema); }
     .btn-salir-top { display: none; border-color: #FCA5A5; color: #FECACA; }
     .btn-salir-top:hover { background: #991B1B; border-color: #991B1B; color: #FFF; }
 
-    /* VISTA PORTAL DE INICIO SIN OVERFLOW INTERNO PARA EVITAR DUPLICACIÓN EN BRAVE/CHROMIUM */
+    /* VISTA PORTAL DE INICIO */
     #portal-view {
       flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 24px 18px;
       background-color: var(--fondo-claro);
@@ -65,7 +65,7 @@
       display: flex; flex-direction: column; justify-content: space-between;
     }
 
-    /* BLOQUE PROTAGONISTA DEL LOGO DEL CONGRESO EN GRANDE */
+    /* BLOQUE PROTAGONISTA DEL LOGO DEL CONGRESO */
     .hero-congreso {
       display: flex; align-items: center; gap: 24px; margin-bottom: 18px;
       background: #FFFFFF; padding: 22px; border-radius: 14px;
@@ -105,18 +105,24 @@
       height: 64px; width: auto; max-width: 215px; object-fit: contain; display: block;
     }
 
-    /* FILA INFERIOR DE REGISTRO Y FECHA */
+    /* FILA INFERIOR DE ACCIONES Y FECHA */
     .portal-cta-row {
       max-width: 1240px; width: 100%; margin: 18px auto 0;
       display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
     }
+    .cta-buttons-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .btn-secundario {
-      display: inline-block; background: var(--oro-crema); color: var(--guinda); border: 1.5px solid var(--oro);
+      display: inline-flex; align-items: center; gap: 8px; background: var(--oro-crema); color: var(--guinda); border: 1.5px solid var(--oro);
       padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
     }
     .btn-secundario:hover { background: var(--oro); color: var(--fondo-oscuro); }
+    .btn-programa-portal {
+      display: inline-flex; align-items: center; gap: 8px; background: #FFFFFF; color: var(--guinda-oscuro); border: 1.5px solid var(--guinda);
+      padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
+    }
+    .btn-programa-portal:hover { background: var(--guinda); color: #FFFFFF; }
 
-    /* TARJETA LOGIN CON MISMA ALTURA QUE LOS DOS BLOQUES DE LA IZQUIERDA */
+    /* TARJETA LOGIN */
     .login-card {
       background: #FFFFFF; border-radius: 14px; padding: 32px 28px;
       box-shadow: 0 12px 32px rgba(56, 10, 23, 0.12); border-top: 5px solid var(--guinda);
@@ -178,7 +184,7 @@
     #video-wrapper { flex: 1; min-width: 0; min-height: 0; background: #000; position: relative; }
     #video-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
-    /* CONTENEDOR DE CHAT CON CUBIERTA INFERIOR PARA EVITAR SALIDA DE LA PLATAFORMA */
+    /* CONTENEDOR DE CHAT CON CUBIERTA INFERIOR */
     #chat-wrapper {
       width: 380px; flex-shrink: 0; min-height: 0; border-left: 2px solid var(--guinda);
       background: #0F0F0F; position: relative; display: flex; flex-direction: column; overflow: hidden;
@@ -190,7 +196,6 @@
     .chat-topbar span { font-size: 12px; color: var(--oro-suave); font-weight: 600; }
     #yt-chat { flex: 1; width: 100%; border: none; }
     
-    /* FRANJA INFERIOR SUPERPUESTA SOBRE "ACCEDE PARA CHATEAR" DE YOUTUBE */
     .chat-bottom-cover {
       position: absolute; bottom: 0; left: 0; right: 0; height: 92px;
       background: linear-gradient(180deg, #16070E 0%, #1E0A14 100%);
@@ -204,23 +209,26 @@
       padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
     }
-    .btn-chat-comentar:hover {
-      background: var(--oro); color: var(--fondo-oscuro);
-    }
-    .chat-bottom-hint {
-      font-size: 11px; color: #CBD5E1; text-align: center;
-    }
+    .btn-chat-comentar:hover { background: var(--oro); color: var(--fondo-oscuro); }
+    .chat-bottom-hint { font-size: 11px; color: #CBD5E1; text-align: center; }
 
     /* MODALES */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30, 10, 20, 0.78); z-index: 50; justify-content: center; align-items: center; padding: 20px; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30, 10, 20, 0.80); z-index: 50; justify-content: center; align-items: center; padding: 20px; }
     .modal-content { background: #FFFFFF; width: 100%; max-width: 680px; height: 85vh; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; border-top: 5px solid var(--oro); }
+    .modal-content.modal-lg { max-width: 960px; height: 88vh; }
     .modal-content.modal-sm { height: auto; max-width: 480px; }
-    .modal-header { background: var(--guinda); color: #FFF; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .modal-header { background: var(--guinda); color: #FFF; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .modal-header-actions { display: flex; align-items: center; gap: 12px; }
+    .btn-pdf-externo {
+      background: var(--oro); color: var(--fondo-oscuro); text-decoration: none; font-size: 12px;
+      font-weight: 700; padding: 6px 12px; border-radius: 6px; transition: 0.2s;
+    }
+    .btn-pdf-externo:hover { background: var(--oro-crema); }
     .close-modal { background: none; border: none; color: var(--oro-crema); font-size: 24px; cursor: pointer; line-height: 1; }
-    .modal-body { flex: 1; }
+    .modal-body { flex: 1; background: #F1F5F9; }
     .modal-body iframe { width: 100%; height: 100%; border: none; }
     .constancia-box { padding: 24px; text-align: center; }
-    .constancia-box p { font-size: 14px; color: var(--texto-gris); margin-bottom: 16px; line-height: 1.5; }
+    .constancia-box p { font-size: 14px; color: var(--texto-gris); margin-bottom: 16px; line-height: 1.55; }
     .status-pill { display: inline-block; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 18px; }
     .status-ok { background: var(--ok-bg); color: var(--ok-txt); }
     .status-wait { background: var(--oro-suave); color: var(--guinda); }
@@ -255,6 +263,7 @@
 
     <div class="header-actions">
       <span class="user-pill" id="user-pill">👤 <strong id="lbl-usuario-activo"></strong></span>
+      <button type="button" class="btn-programa-top" onclick="abrirModalPrograma()">📄 Programa</button>
       <button type="button" class="btn-constancia-top" id="btn-header-constancia" onclick="abrirModalConstancia()">🎓 Constancia</button>
       <button type="button" class="btn-registro-top" id="btn-header-reg" onclick="abrirModalRegistro()">Obtener Acceso / Registro</button>
       <button type="button" class="btn-salir-top" id="btn-header-salir" onclick="cerrarSesion()">← Cerrar Sesión</button>
@@ -315,7 +324,10 @@
     </div>
 
     <div class="portal-cta-row">
-      <button type="button" class="btn-secundario" onclick="abrirModalRegistro()">¿Aún no tienes clave? Regístrate aquí</button>
+      <div class="cta-buttons-group">
+        <button type="button" class="btn-secundario" onclick="abrirModalRegistro()">¿Aún no tienes clave? Regístrate aquí</button>
+        <button type="button" class="btn-programa-portal" onclick="abrirModalPrograma()">📄 Consultar Programa del Congreso</button>
+      </div>
       <span style="font-size: 13px; color: var(--texto-gris); font-weight: 600;">Del 23 al 26 de noviembre de 2026 • Modalidad Híbrida</span>
     </div>
 
@@ -359,6 +371,22 @@
     </div>
   </section>
 
+  <!-- MODAL PROGRAMA DEL CONGRESO -->
+  <div id="modal-programa" class="modal-overlay">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h4>Programa Oficial — Congreso de Seguridad Pública</h4>
+        <div class="modal-header-actions">
+          <a href="docs/programa.pdf" target="_blank" rel="noopener" class="btn-pdf-externo">⬇ Abrir / Descargar PDF</a>
+          <button type="button" class="close-modal" onclick="cerrarModalPrograma()">&times;</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <iframe id="iframe-programa" src="">Cargando programa…</iframe>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL REGISTRO -->
   <div id="modal-registro" class="modal-overlay">
     <div class="modal-content">
@@ -381,14 +409,14 @@
       </div>
       <div class="constancia-box">
         <div id="constancia-status" class="status-pill status-wait">Verificando asistencia...</div>
-        <p id="constancia-detalle">Consultando tus minutos acumulados en la sesión actual.</p>
+        <p id="constancia-detalle">Consultando tus minutos acumulados en el Congreso.</p>
         <button type="button" class="btn-ingresar" id="btn-descargar-pdf" style="display:none;" onclick="generarPDFConstancia()">Descargar Constancia en PDF</button>
       </div>
     </div>
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwY_dzIAUvWmzdSRBuzcToanCsX_0PkXuaxCjQlf14tQkXBK3qRcmyHRYbWPeSEi2QgtQ/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbw71Cov1mWq1lUfp7kI7shqCYCq9IB2mNzhqyl4beexLkczGK8L7R9C0-sPqgTUqKnlvw/exec';
 
     let sesionActiva = null;
     let segundosPendientes = 0;
@@ -412,6 +440,18 @@
       }
     }
 
+    function abrirModalPrograma() {
+      const iframe = document.getElementById('iframe-programa');
+      if (!iframe.getAttribute('src')) {
+        iframe.src = 'docs/programa.pdf#toolbar=1&navpanes=0';
+      }
+      document.getElementById('modal-programa').style.display = 'flex';
+    }
+
+    function cerrarModalPrograma() {
+      document.getElementById('modal-programa').style.display = 'none';
+    }
+
     function abrirModalRegistro() {
       document.getElementById('modal-registro').style.display = 'flex';
     }
@@ -429,7 +469,6 @@
       if (!srcChat) return;
       const urlPopout = srcChat.split('&embed_domain')[0] + '&is_popout=1';
 
-      // Calcula la posición exacta del panel derecho del chat en el monitor
       const chatBox = document.getElementById('chat-wrapper');
       const rect = chatBox.getBoundingClientRect();
       const winLeft = window.screenX !== undefined ? window.screenX : window.screenLeft;
@@ -613,7 +652,7 @@
       const btnPdf = document.getElementById('btn-descargar-pdf');
 
       statusEl.className = 'status-pill status-wait';
-      statusEl.textContent = 'Consultando registro...';
+      statusEl.textContent = 'Consultando registro global...';
       btnPdf.style.display = 'none';
 
       fetch(API_URL, {
@@ -624,13 +663,13 @@
       .then(res => {
         if (res.cumple) {
           statusEl.className = 'status-pill status-ok';
-          statusEl.textContent = `✓ Acreditado (${res.minutos} min registrados)`;
-          detalleEl.innerHTML = `Has cumplido el tiempo mínimo requerido (<strong>${res.requeridos} min</strong>) para <strong>${res.sesion}</strong>. Ya puedes descargar tu constancia.`;
+          statusEl.textContent = `✓ Acreditado (${res.minutos} min acumulados)`;
+          detalleEl.innerHTML = `Has cumplido el tiempo mínimo requerido (<strong>${res.requeridos} min</strong> en el Congreso). Ya puedes descargar tu constancia oficial en PDF.`;
           btnPdf.style.display = 'inline-block';
         } else {
           statusEl.className = 'status-pill status-wait';
           statusEl.textContent = `En progreso: ${res.minutos} / ${res.requeridos} min`;
-          detalleEl.innerHTML = `Permanece conectado en la sesión <strong>${res.sesion}</strong> hasta completar al menos <strong>${res.requeridos} minutos</strong> para habilitar la descarga.`;
+          detalleEl.innerHTML = `Permanece conectado en las transmisiones del Congreso hasta acumular al menos <strong>${res.requeridos} minutos</strong> totales para habilitar tu descarga.`;
         }
       })
       .catch(() => {
@@ -638,54 +677,81 @@
       });
     }
 
-    function generarPDFConstancia() {
-      if (!sesionActiva || !window.jspdf) return;
-      const { jsPDF } = window.jspdf;
+    // GENERACIÓN VECTORIAL SOBRE docs/plantilla.pdf CON PDF-LIB
+    async function generarPDFConstancia() {
+      if (!sesionActiva || !window.PDFLib) return;
       const btnPdf = document.getElementById('btn-descargar-pdf');
-      
       btnPdf.disabled = true;
-      btnPdf.textContent = 'Generando PDF institucional...';
+      btnPdf.textContent = 'Generando constancia PDF...';
 
-      const img = new Image();
-      img.crossOrigin = 'Anonymous';
-      img.src = 'img/plantilla.png?v=' + new Date().getTime();
+      try {
+        const { PDFDocument, rgb, StandardFonts } = window.PDFLib;
+        const urlPlantilla = 'docs/plantilla.pdf?v=' + new Date().getTime();
+        const respuesta = await fetch(urlPlantilla);
 
-      img.onload = function() {
-        const esHorizontal = img.naturalWidth >= img.naturalHeight;
-        const doc = new jsPDF({
-          orientation: esHorizontal ? 'landscape' : 'portrait',
-          unit: 'mm',
-          format: 'letter'
+        if (!respuesta.ok) {
+          throw new Error('No se encontró docs/plantilla.pdf en el repositorio.');
+        }
+
+        const pdfBytes = await respuesta.arrayBuffer();
+        const pdfDoc = await PDFDocument.load(pdfBytes);
+        const paginas = pdfDoc.getPages();
+        const primeraPagina = paginas[0];
+        const { width, height } = primeraPagina.getSize();
+
+        const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+        const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+        // Nombre completo del participante en mayúsculas
+        const nombreTexto = sesionActiva.nombre.toUpperCase();
+        let fontSizeNombre = 22;
+        let anchoTexto = fontBold.widthOfTextAtSize(nombreTexto, fontSizeNombre);
+
+        // Ajusta automáticamente el tamaño si el nombre es muy largo
+        const anchoMaximo = width - 80;
+        while (anchoTexto > anchoMaximo && fontSizeNombre > 13) {
+          fontSizeNombre -= 1;
+          anchoTexto = fontBold.widthOfTextAtSize(nombreTexto, fontSizeNombre);
+        }
+
+        const posXNombre = (width - anchoTexto) / 2;
+        const posYNombre = height * 0.50; // Mitad vertical de la hoja (ajustable si requieres subirlo/bajarlo)
+
+        primeraPagina.drawText(nombreTexto, {
+          x: posXNombre,
+          y: posYNombre,
+          size: fontSizeNombre,
+          font: fontBold,
+          color: rgb(0.41, 0.11, 0.20) // Guinda institucional (#691C32)
         });
 
-        const anchoPagina = doc.internal.pageSize.getWidth();
-        const altoPagina = doc.internal.pageSize.getHeight();
-        const centroX = anchoPagina / 2;
+        // Folio de verificación en la parte inferior
+        const folioTexto = `Folio de verificación: USJT-CONGRESO-${sesionActiva.usuario.toUpperCase()}-2026`;
+        const fontSizeFolio = 9;
+        const anchoFolio = fontRegular.widthOfTextAtSize(folioTexto, fontSizeFolio);
 
-        doc.addImage(img, 'PNG', 0, 0, anchoPagina, altoPagina, undefined, 'SLOW');
+        primeraPagina.drawText(folioTexto, {
+          x: (width - anchoFolio) / 2,
+          y: 28,
+          size: fontSizeFolio,
+          font: fontRegular,
+          color: rgb(0.35, 0.35, 0.35)
+        });
 
-        const posYNombre = altoPagina * 0.48;
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(22);
-        doc.setTextColor(105, 28, 50);
-        doc.text(sesionActiva.nombre.toUpperCase(), centroX, posYNombre, { align: 'center', maxWidth: anchoPagina - 40 });
-
-        const folio = `USJT-CONGRESO-${sesionActiva.usuario.toUpperCase()}-2026`;
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(90, 90, 90);
-        doc.text(`Folio de verificación: ${folio}`, centroX, altoPagina - 12, { align: 'center' });
-
-        doc.save(`Constancia_${sesionActiva.usuario}.pdf`);
+        const pdfFinalBytes = await pdfDoc.save();
+        const blob = new Blob([pdfFinalBytes], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Constancia_${sesionActiva.usuario}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        alert('No se pudo generar la constancia. Verifica que docs/plantilla.pdf esté subido en tu repositorio.');
+      } finally {
         btnPdf.disabled = false;
         btnPdf.textContent = 'Descargar Constancia en PDF';
-      };
-
-      img.onerror = function() {
-        alert('No se encontró img/plantilla.png en el repositorio. Verifica que esté dentro de la carpeta img/.');
-        btnPdf.disabled = false;
-        btnPdf.textContent = 'Descargar Constancia en PDF';
-      };
+      }
     }
   </script>
 </body>
