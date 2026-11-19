@@ -451,6 +451,24 @@
       if (e.key === 'Enter') iniciarSesion();
     });
 
+    async function fetchConReintento(payload, onEspera, maxIntentos = 6) {
+      for (let intento = 1; intento <= maxIntentos; intento++) {
+        try {
+          const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          if (!response.ok) throw new Error('Servidor ocupado');
+          return await response.json();
+        } catch (err) {
+          if (intento === maxIntentos) throw err;
+          const esperaMs = (intento * 1500) + Math.floor(Math.random() * 2000);
+          if (onEspera) onEspera(intento + 1, maxIntentos);
+          await new Promise(resolve => setTimeout(resolve, esperaMs));
+        }
+      }
+    }
+
     function cargarContadorRegistrados() {
       fetch(API_URL, {
         method: 'POST',
@@ -529,7 +547,7 @@
       );
     }
 
-    function iniciarSesion() {
+    async function iniciarSesion() {
       const user = document.getElementById('usuario').value;
       const pass = document.getElementById('password').value;
       const btn = document.getElementById('btn-entrar');
@@ -540,16 +558,28 @@
         return;
       }
 
+      const mensajesCarga = [
+        'Verificando credenciales...',
+        'Preparando tu acceso...',
+        'Conectando con la sala...',
+        'Cargando transmisión...',
+        'Un momento más...'
+      ];
+
       btn.disabled = true;
-      btn.textContent = 'Verificando credenciales...';
+      btn.textContent = mensajesCarga[0];
       errorDiv.style.display = 'none';
 
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ accion: 'login', usuario: user, password: pass })
-      })
-      .then(response => response.json())
-      .then(res => {
+      try {
+        const res = await fetchConReintento(
+          { accion: 'login', usuario: user, password: pass },
+          (sigIntento) => {
+            const idx = Math.min(sigIntento - 1, mensajesCarga.length - 1);
+            btn.textContent = mensajesCarga[idx];
+          },
+          6
+        );
+
         if (res.autorizado) {
           sesionActiva = {
             usuario: res.usuario,
@@ -563,12 +593,11 @@
           btn.disabled = false;
           btn.textContent = 'Entrar a la Transmisión';
         }
-      })
-      .catch(() => {
-        mostrarError('Error de conexión con la base de datos. Verifica tu red.');
+      } catch (err) {
+        mostrarError('No se pudo completar el acceso. Por favor presiona "Entrar" nuevamente.');
         btn.disabled = false;
         btn.textContent = 'Entrar a la Transmisión';
-      });
+      }
     }
 
     function mostrarError(texto) {
@@ -685,7 +714,7 @@
       }
     });
 
-    function abrirModalConstancia() {
+    async function abrirModalConstancia() {
       if (!sesionActiva) return;
       enviarHeartbeat(false);
       document.getElementById('modal-constancia').style.display = 'flex';
@@ -693,16 +722,28 @@
       const detalleEl = document.getElementById('constancia-detalle');
       const btnPdf = document.getElementById('btn-descargar-pdf');
 
+      const mensajesConstancia = [
+        'Consultando registro global...',
+        'Verificando minutos acumulados...',
+        'Validando asistencia...',
+        'Finalizando consulta...'
+      ];
+
       statusEl.className = 'status-pill status-wait';
-      statusEl.textContent = 'Consultando registro global...';
+      statusEl.textContent = mensajesConstancia[0];
+      detalleEl.textContent = 'Esto puede tomar unos segundos.';
       btnPdf.style.display = 'none';
 
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ accion: 'consultar_constancia', usuario: sesionActiva.usuario })
-      })
-      .then(r => r.json())
-      .then(res => {
+      try {
+        const res = await fetchConReintento(
+          { accion: 'consultar_constancia', usuario: sesionActiva.usuario },
+          (sigIntento) => {
+            const idx = Math.min(sigIntento - 1, mensajesConstancia.length - 1);
+            statusEl.textContent = mensajesConstancia[idx];
+          },
+          6
+        );
+
         if (res.cumple) {
           statusEl.className = 'status-pill status-ok';
           statusEl.textContent = `✓ Acreditado (${res.minutos} min acumulados)`;
@@ -713,10 +754,10 @@
           statusEl.textContent = `En progreso: ${res.minutos} / ${res.requeridos} min`;
           detalleEl.innerHTML = `Permanece conectado en las transmisiones del Congreso hasta acumular al menos <strong>${res.requeridos} minutos</strong> totales para habilitar tu descarga.`;
         }
-      })
-      .catch(() => {
-        statusEl.textContent = 'No se pudo consultar en este momento';
-      });
+      } catch (err) {
+        statusEl.textContent = 'No se pudo completar la consulta';
+        detalleEl.textContent = 'Cierra esta ventana y vuelve a presionar "Constancia" en un momento.';
+      }
     }
 
     // GENERACIÓN VECTORIAL SOBRE docs/plantilla.pdf CON ENCODE SANS EXTRABOLD 20 PT (#54565A)
