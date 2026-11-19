@@ -470,7 +470,13 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwb-Bt2a4pVXAMF7KvMirmbeoK8FEq3uCOyYsres65h3t2npNdH2HGXgpS0C1um1leH/exec';
+    const APIS_DISPONIBLES = [
+      'https://script.google.com/macros/s/AKfycbxSlDCthzEPoReHE-78-lQoeWxrdkxhLxSvR-lfLTNR898RLqQ9U6ZcKyGaOutdXh_4bg/exec',
+      'https://script.google.com/macros/s/AKfycbw-ztROUdyMJSW_HYh9RCylSIiSkpjhaWlqLeyR56ayIoPNLlRGq69tG6yT3SwLTeps/exec'
+    ];
+
+    let indiceApiActual = Math.floor(Math.random() * APIS_DISPONIBLES.length);
+    let API_URL = APIS_DISPONIBLES[indiceApiActual];
 
     let sesionActiva = null;
     let segundosPendientes = 0;
@@ -484,16 +490,18 @@
 
     async function fetchConReintento(payload, onEspera, maxIntentos = 6) {
       for (let intento = 1; intento <= maxIntentos; intento++) {
+        const urlTurno = APIS_DISPONIBLES[(indiceApiActual + intento - 1) % APIS_DISPONIBLES.length];
         try {
-          const response = await fetch(API_URL, {
+          const response = await fetch(urlTurno, {
             method: 'POST',
             body: JSON.stringify(payload)
           });
           if (!response.ok) throw new Error('Servidor ocupado');
+          API_URL = urlTurno;
           return await response.json();
         } catch (err) {
           if (intento === maxIntentos) throw err;
-          const esperaMs = (intento * 1500) + Math.floor(Math.random() * 2000);
+          const esperaMs = (intento * 1200) + Math.floor(Math.random() * 1500);
           if (onEspera) onEspera(intento + 1, maxIntentos);
           await new Promise(resolve => setTimeout(resolve, esperaMs));
         }
@@ -680,7 +688,7 @@
       segundosPendientes = Number(localStorage.getItem(claveRespaldo)) || 0;
       segundosTotalesLocales = segundosPendientes;
 
-      const primerPulso = Math.floor(15000 + Math.random() * 45000);
+      const primerPulso = Math.floor(20000 + Math.random() * 60000);
       timeoutHeartbeat = setTimeout(cicloHeartbeat, primerPulso);
 
       intervaloContador = setInterval(() => {
@@ -697,7 +705,8 @@
     function cicloHeartbeat() {
       if (!sesionActiva) return;
       enviarHeartbeat(false);
-      const siguienteIntervalo = Math.floor(600000 + Math.random() * 300000);
+      // Intervalo aleatorio entre 20 y 30 minutos para soportar hasta 4,000 asistentes
+      const siguienteIntervalo = Math.floor(1200000 + Math.random() * 600000);
       timeoutHeartbeat = setTimeout(cicloHeartbeat, siguienteIntervalo);
     }
 
