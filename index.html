@@ -4,31 +4,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Congreso de Seguridad Pública | USJT</title>
-  <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
   <style>
     :root {
       /* PALETA OFICIAL DE COLOR */
       --guinda: #AB0033;
-      --guinda-claro: #C4003B;
+      --guinda-claro: #C70A42;
       --guinda-oscuro: #7D0025;
       --oro: #BC955C;
       --arena: #DDC9A3;
-      --arena-claro: #F6EFE2;
-      --gris-institucional: #54565A;
-      --gris-oscuro: #2E3033;
-      --fondo-claro: #F8F8F9;
-      --texto-oscuro: #232426;
-      --error-bg: #FEE2E2; --error-txt: #991B1B;
-      --ok-bg: #DCFCE7; --ok-txt: #166534;
+      --arena-clara: #F4ECE0;
+      --gris-oscuro: #54565A;
+      --fondo-sala: #232426;
+      --fondo-claro: #F8F7F5;
+      --texto-oscuro: #2C2D30;
+      --texto-gris: #54565A;
+      --error-bg: #FEE2E2;
+      --error-txt: #991B1B;
+      --ok-bg: #DCFCE7;
+      --ok-txt: #166534;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Encode Sans', sans-serif; }
     html, body { min-height: 100vh; background-color: var(--fondo-claro); color: var(--texto-oscuro); }
     body { display: flex; flex-direction: column; overflow-x: hidden; }
 
-    /* CINTILLA SUPERIOR AMPLIADA CON PALETA OFICIAL */
+    /* CINTILLA SUPERIOR AMPLIADA */
     header {
-      background: linear-gradient(90deg, var(--guinda-oscuro) 0%, var(--guinda) 100%);
+      background: linear-gradient(90deg, #3D0012 0%, var(--guinda) 100%);
       color: #FFFFFF; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center;
       border-bottom: 4px solid var(--oro); box-shadow: 0 4px 14px rgba(84, 86, 90, 0.25); z-index: 20; flex-shrink: 0; gap: 16px;
       position: relative;
@@ -44,24 +48,24 @@
 
     .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .user-pill {
-      display: none; align-items: center; gap: 8px; background: rgba(255,255,255,0.12);
+      display: none; align-items: center; gap: 8px; background: rgba(255,255,255,0.14);
       border: 1px solid var(--arena); padding: 7px 14px; border-radius: 20px; font-size: 12.5px; color: #FFFFFF;
     }
     .btn-registro-top, .btn-salir-top, .btn-constancia-top, .btn-programa-top {
-      background: transparent; border: 1.5px solid var(--oro); color: #FFFFFF;
+      background: transparent; border: 1.5px solid var(--arena); color: #FFFFFF;
       padding: 9px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
     }
-    .btn-registro-top:hover, .btn-programa-top:hover { background: var(--oro); color: #FFFFFF; }
-    .btn-constancia-top { display: none; background: var(--oro); color: #FFFFFF; }
-    .btn-constancia-top:hover { background: var(--arena); color: var(--guinda-oscuro); }
-    .btn-salir-top { display: none; border-color: var(--arena); color: var(--arena); }
-    .btn-salir-top:hover { background: var(--gris-institucional); border-color: var(--gris-institucional); color: #FFFFFF; }
+    .btn-registro-top:hover, .btn-programa-top:hover { background: var(--oro); border-color: var(--oro); color: #FFFFFF; }
+    .btn-constancia-top { display: none; background: var(--oro); border-color: var(--oro); color: #FFFFFF; }
+    .btn-constancia-top:hover { background: var(--arena); border-color: var(--arena); color: var(--texto-oscuro); }
+    .btn-salir-top { display: none; border-color: #FCA5A5; color: #FECACA; }
+    .btn-salir-top:hover { background: #7D0025; border-color: #FFFFFF; color: #FFF; }
 
     /* VISTA PORTAL DE INICIO */
     #portal-view {
       flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 24px 18px;
       background-color: var(--fondo-claro);
-      background-image: radial-gradient(circle at top right, rgba(221, 201, 163, 0.28), transparent 50%),
+      background-image: radial-gradient(circle at top right, rgba(221, 201, 163, 0.28), transparent 52%),
                         radial-gradient(circle at bottom left, rgba(171, 0, 51, 0.07), transparent 50%);
     }
     .portal-grid {
@@ -76,25 +80,33 @@
     .hero-congreso {
       display: flex; align-items: center; gap: 24px; margin-bottom: 18px;
       background: #FFFFFF; padding: 22px; border-radius: 14px;
-      border: 1px solid #E5E7EB; border-left: 5px solid var(--guinda);
+      border: 1px solid #E2E0DC; border-left: 5px solid var(--guinda);
       box-shadow: 0 6px 20px rgba(84, 86, 90, 0.08);
     }
     .congreso-logo-grande {
       flex-shrink: 0; width: 205px; height: 205px; display: flex; align-items: center; justify-content: center;
-      background: #FAFAFA; border-radius: 12px; padding: 10px; border: 1px solid var(--arena);
+      background: #F4F3F1; border-radius: 12px; padding: 10px; border: 1px solid var(--arena);
     }
     .congreso-logo-grande img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
 
-    .tag-vivo {
-      display: inline-flex; align-items: center; gap: 8px; background: var(--arena-claro); color: var(--guinda);
-      font-weight: 700; font-size: 11.5px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--oro); margin-bottom: 10px;
+    .hero-tags-row {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px;
     }
+    .tag-vivo {
+      display: inline-flex; align-items: center; gap: 8px; background: var(--arena-clara); color: var(--guinda);
+      font-weight: 700; font-size: 11.5px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--oro);
+    }
+    .tag-registrados {
+      display: none; align-items: center; gap: 6px; background: #FFFFFF; color: var(--gris-oscuro);
+      font-weight: 700; font-size: 11.5px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--oro);
+    }
+    .tag-registrados strong { color: var(--guinda); }
     .dot-pulse { width: 8px; height: 8px; background: var(--guinda); border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     .hero-texto h2 { font-size: 25px; font-weight: 700; color: var(--guinda); line-height: 1.22; margin-bottom: 8px; }
     .hero-texto .lema { font-size: 14px; font-style: italic; font-weight: 600; color: var(--oro); margin-bottom: 8px; }
-    .hero-texto p { font-size: 13.5px; color: var(--gris-institucional); line-height: 1.5; }
+    .hero-texto p { font-size: 13.5px; color: var(--texto-gris); line-height: 1.5; }
 
     /* RECUADRO INSTITUCIONES CONVOCANTES */
     .instituciones-strip {
@@ -103,7 +115,7 @@
     }
     .instituciones-label {
       font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
-      color: var(--gris-institucional); margin-bottom: 14px; display: block;
+      color: var(--gris-oscuro); margin-bottom: 14px; display: block;
     }
     .instituciones-logos {
       display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
@@ -119,32 +131,32 @@
     }
     .cta-buttons-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .btn-secundario {
-      display: inline-flex; align-items: center; gap: 8px; background: var(--arena-claro); color: var(--guinda); border: 1.5px solid var(--oro);
+      display: inline-flex; align-items: center; gap: 8px; background: var(--arena-clara); color: var(--guinda); border: 1.5px solid var(--oro);
       padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
     }
-    .btn-secundario:hover { background: var(--arena); color: var(--guinda-oscuro); }
+    .btn-secundario:hover { background: var(--oro); color: #FFFFFF; }
     .btn-programa-portal {
-      display: inline-flex; align-items: center; gap: 8px; background: #FFFFFF; color: var(--gris-institucional); border: 1.5px solid var(--gris-institucional);
+      display: inline-flex; align-items: center; gap: 8px; background: #FFFFFF; color: var(--gris-oscuro); border: 1.5px solid var(--gris-oscuro);
       padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
     }
-    .btn-programa-portal:hover { background: var(--gris-institucional); color: #FFFFFF; }
+    .btn-programa-portal:hover { background: var(--gris-oscuro); color: #FFFFFF; }
 
     /* TARJETA LOGIN */
     .login-card {
       background: #FFFFFF; border-radius: 14px; padding: 32px 28px;
-      box-shadow: 0 12px 32px rgba(84, 86, 90, 0.12); border-top: 5px solid var(--guinda);
+      box-shadow: 0 12px 32px rgba(84, 86, 90, 0.14); border-top: 5px solid var(--guinda);
       display: flex; flex-direction: column; justify-content: center; height: 100%;
     }
     .login-card h3 { font-size: 21px; font-weight: 700; color: var(--guinda); margin-bottom: 6px; }
-    .login-card .sub { font-size: 13.5px; color: var(--gris-institucional); margin-bottom: 24px; }
+    .login-card .sub { font-size: 13.5px; color: var(--texto-gris); margin-bottom: 24px; }
 
     .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--gris-institucional); margin-bottom: 6px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--texto-oscuro); margin-bottom: 6px; }
     .input-wrap { position: relative; display: flex; align-items: center; }
     .form-group input { width: 100%; padding: 13px 42px 13px 14px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-size: 14px; color: var(--texto-oscuro); }
     .form-group input:focus { outline: none; border-color: var(--guinda); }
     .toggle-pass {
-      position: absolute; right: 10px; background: none; border: none; color: var(--gris-institucional);
+      position: absolute; right: 10px; background: none; border: none; color: var(--gris-oscuro);
       cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;
     }
     .toggle-pass:hover { color: var(--guinda); }
@@ -160,18 +172,18 @@
 
     .portal-footer-logos {
       max-width: 1240px; width: 100%; margin: 18px auto 0; padding-top: 12px; border-top: 1px solid var(--arena);
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--gris-institucional);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--gris-oscuro);
     }
 
     /* VISTA DE TRANSMISIÓN ADAPTATIVA */
     #stream-view {
-      display: none; flex: 1; height: calc(100vh - 94px); min-height: 540px; width: 100%; background: var(--gris-oscuro); flex-direction: column;
+      display: none; flex: 1; height: calc(100vh - 94px); min-height: 540px; width: 100%; background: var(--fondo-sala); flex-direction: column;
     }
     .stream-subbar {
-      background: var(--gris-institucional); border-bottom: 1.5px solid var(--oro); padding: 7px 24px;
+      background: var(--gris-oscuro); border-bottom: 2px solid var(--oro); padding: 7px 24px;
       display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-shrink: 0; flex-wrap: wrap;
     }
-    .subbar-info { display: flex; align-items: center; gap: 10px; color: #FFFFFF; }
+    .subbar-info { display: flex; align-items: center; gap: 10px; color: #FFF; }
     .subbar-badge { background: var(--guinda); border: 1px solid var(--arena); color: #FFFFFF; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 4px; }
     .subbar-title { font-size: 13px; font-weight: 600; color: var(--arena); }
     
@@ -182,7 +194,7 @@
     }
     .subbar-logo-light img { max-height: 26px; width: auto; display: block; }
     .timer-badge {
-      font-size: 12px; font-weight: 600; color: #FFFFFF; background: var(--guinda-oscuro); padding: 5px 10px; border-radius: 6px; border: 1px solid var(--oro);
+      font-size: 12px; font-weight: 600; color: #FFFFFF; background: var(--guinda); padding: 5px 10px; border-radius: 6px; border: 1px solid var(--arena);
     }
 
     .stream-stage {
@@ -194,10 +206,10 @@
     /* CONTENEDOR DE CHAT CON CUBIERTA INFERIOR */
     #chat-wrapper {
       width: 380px; flex-shrink: 0; min-height: 0; border-left: 2px solid var(--guinda);
-      background: #141517; position: relative; display: flex; flex-direction: column; overflow: hidden;
+      background: #18191B; position: relative; display: flex; flex-direction: column; overflow: hidden;
     }
     .chat-topbar {
-      background: var(--gris-institucional); padding: 8px 14px; border-bottom: 1px solid var(--oro);
+      background: var(--gris-oscuro); padding: 8px 14px; border-bottom: 1px solid var(--oro);
       display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 5;
     }
     .chat-topbar span { font-size: 12px; color: var(--arena); font-weight: 600; }
@@ -205,46 +217,47 @@
     
     .chat-bottom-cover {
       position: absolute; bottom: 0; left: 0; right: 0; height: 92px;
-      background: linear-gradient(180deg, var(--gris-oscuro) 0%, var(--gris-institucional) 100%);
-      border-top: 1.5px solid var(--oro);
+      background: linear-gradient(180deg, #3A3C3F 0%, var(--gris-oscuro) 100%);
+      border-top: 2px solid var(--oro);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       padding: 10px 16px; gap: 6px; z-index: 10;
     }
     .btn-chat-comentar {
       width: 100%; background: linear-gradient(135deg, var(--guinda) 0%, var(--guinda-oscuro) 100%);
-      color: #FFFFFF; border: 1.5px solid var(--oro); border-radius: 22px;
+      color: #FFFFFF; border: 1.5px solid var(--arena); border-radius: 22px;
       padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
     }
-    .btn-chat-comentar:hover { background: var(--oro); color: #FFFFFF; }
+    .btn-chat-comentar:hover { background: var(--oro); border-color: var(--oro); color: #FFFFFF; }
     .chat-bottom-hint { font-size: 11px; color: var(--arena); text-align: center; }
 
     /* MODALES */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(46, 48, 51, 0.82); z-index: 50; justify-content: center; align-items: center; padding: 20px; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(44, 45, 48, 0.82); z-index: 50; justify-content: center; align-items: center; padding: 20px; }
     .modal-content { background: #FFFFFF; width: 100%; max-width: 680px; height: 85vh; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; border-top: 5px solid var(--oro); }
     .modal-content.modal-lg { max-width: 960px; height: 88vh; }
     .modal-content.modal-sm { height: auto; max-width: 480px; }
-    .modal-header { background: var(--guinda); color: #FFFFFF; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .modal-header { background: var(--guinda); color: #FFF; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
     .modal-header-actions { display: flex; align-items: center; gap: 12px; }
     .btn-pdf-externo {
       background: var(--oro); color: #FFFFFF; text-decoration: none; font-size: 12px;
       font-weight: 700; padding: 6px 12px; border-radius: 6px; transition: 0.2s;
     }
-    .btn-pdf-externo:hover { background: var(--arena); color: var(--guinda-oscuro); }
+    .btn-pdf-externo:hover { background: var(--arena); color: var(--texto-oscuro); }
     .close-modal { background: none; border: none; color: var(--arena); font-size: 24px; cursor: pointer; line-height: 1; }
     .modal-body { flex: 1; background: #F1F5F9; }
     .modal-body iframe { width: 100%; height: 100%; border: none; }
     .constancia-box { padding: 24px; text-align: center; }
-    .constancia-box p { font-size: 14px; color: var(--gris-institucional); margin-bottom: 16px; line-height: 1.55; }
+    .constancia-box p { font-size: 14px; color: var(--texto-gris); margin-bottom: 16px; line-height: 1.55; }
     .status-pill { display: inline-block; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 18px; }
     .status-ok { background: var(--ok-bg); color: var(--ok-txt); }
-    .status-wait { background: var(--arena-claro); color: var(--guinda); border: 1px solid var(--oro); }
+    .status-wait { background: var(--arena-clara); color: var(--guinda); border: 1px solid var(--oro); }
 
     @media (max-width: 1024px) {
       header { padding: 14px 18px; }
       .brand-title h1 { font-size: 16px; }
       .portal-grid { grid-template-columns: 1fr; gap: 24px; }
       .hero-congreso { flex-direction: column; text-align: center; }
+      .hero-tags-row { justify-content: center; }
       .congreso-logo-grande { width: 170px; height: 170px; }
       .instituciones-logos { justify-content: center; }
       .instituciones-logos img { height: 52px; max-width: 165px; }
@@ -287,7 +300,10 @@
             <img src="img/congreso.png" alt="Congreso de Seguridad Pública" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22><rect width=%22160%22 height=%22160%22 rx=%2210%22 fill=%22%23DDC9A3%22/><text x=%2280%22 y=%2284%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2213%22 fill=%22%23AB0033%22 text-anchor=%22middle%22>CONGRESO</text></svg>';">
           </div>
           <div class="hero-texto">
-            <div class="tag-vivo"><span class="dot-pulse"></span> TRANSMISIÓN EN DIRECTO</div>
+            <div class="hero-tags-row">
+              <div class="tag-vivo"><span class="dot-pulse"></span> TRANSMISIÓN EN DIRECTO</div>
+              <div class="tag-registrados" id="badge-registrados">👥 <strong id="num-registrados">0</strong> registrados</div>
+            </div>
             <h2>Congreso de Seguridad Pública</h2>
             <div class="lema">“Coordinación, Inteligencia y Desafíos”</div>
             <p>Ingresa con el usuario y contraseña enviados a tu correo para acceder a la sala en vivo y registrar automáticamente tu asistencia para constancia.</p>
@@ -335,7 +351,7 @@
         <button type="button" class="btn-secundario" onclick="abrirModalRegistro()">¿Aún no tienes clave? Regístrate aquí</button>
         <button type="button" class="btn-programa-portal" onclick="abrirModalPrograma()">📄 Consultar Programa del Congreso</button>
       </div>
-      <span style="font-size: 13px; color: var(--gris-institucional); font-weight: 600;">Del 23 al 26 de noviembre de 2026 • Modalidad Híbrida</span>
+      <span style="font-size: 13px; color: var(--gris-oscuro); font-weight: 600;">Del 23 al 26 de noviembre de 2026 • Modalidad Híbrida</span>
     </div>
 
     <div class="portal-footer-logos">
@@ -402,7 +418,7 @@
         <button type="button" class="close-modal" onclick="cerrarModalRegistro()">&times;</button>
       </div>
       <div class="modal-body">
-        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdFA_SSFU8czw7g7lxPiTJYImGEf3jS872id06ZAiQclhpy0w/viewform?embedded=true">Cargando…</iframe>
+        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSd3d2BjpwKbV_1tLSs9W6-I-I_didbvA4XlpAc75gU_QRFOzw/viewform?embedded=true" frameborder="0" marginheight="0" marginwidth="0">Cargando…</iframe>
       </div>
     </div>
   </div>
@@ -423,7 +439,7 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyntk1gVMKzaM36iv4gDu1FM70p33FRwIIh_jAAO_X2YBKJ_eDx9-GXURy28VoP65xYDg/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwETkm4XexIlgyKxEy104ofdK2sFK6uhH0eGuguKZqhg0lPlVUVdsMrYdk1X0oVXtcdjw/exec';
 
     let sesionActiva = null;
     let segundosPendientes = 0;
@@ -434,6 +450,25 @@
     document.getElementById('password').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') iniciarSesion();
     });
+
+    function cargarContadorRegistrados() {
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ accion: 'total_registrados' })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (typeof res.total === 'number') {
+          document.getElementById('num-registrados').textContent = res.total.toLocaleString('es-MX');
+          document.getElementById('badge-registrados').style.display = 'inline-flex';
+        }
+      })
+      .catch(() => {
+        // Si falla la red, se mantiene oculto sin afectar el login
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarContadorRegistrados);
 
     function alternarPassword() {
       const input = document.getElementById('password');
@@ -684,7 +719,7 @@
       });
     }
 
-    // GENERACIÓN VECTORIAL SOBRE docs/plantilla.pdf CON PDF-LIB
+    // GENERACIÓN VECTORIAL SOBRE docs/plantilla.pdf CON ENCODE SANS EXTRABOLD 20 PT (#54565A)
     async function generarPDFConstancia() {
       if (!sesionActiva || !window.PDFLib) return;
       const btnPdf = document.getElementById('btn-descargar-pdf');
@@ -702,46 +737,49 @@
 
         const pdfBytes = await respuesta.arrayBuffer();
         const pdfDoc = await PDFDocument.load(pdfBytes);
+
+        // Incrustar Encode Sans ExtraBold (800) con respaldo a HelveticaBold
+        let fontNombre;
+        try {
+          if (window.fontkit) {
+            pdfDoc.registerFontkit(window.fontkit);
+            const fontUrl = 'https://cdn.jsdelivr.net/fontsource/fonts/encode-sans@latest/latin-800-normal.ttf';
+            const fontRes = await fetch(fontUrl);
+            if (!fontRes.ok) throw new Error('Error al cargar Encode Sans ExtraBold');
+            const fontBytes = await fontRes.arrayBuffer();
+            fontNombre = await pdfDoc.embedFont(fontBytes);
+          } else {
+            fontNombre = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+          }
+        } catch (fontErr) {
+          fontNombre = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+        }
+
         const paginas = pdfDoc.getPages();
         const primeraPagina = paginas[0];
         const { width, height } = primeraPagina.getSize();
 
-        const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-        const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        // Nombre completo del participante centrado (20 pts, #54565A)
+        const nombreTexto = sesionActiva.nombre.trim();
+        let fontSizeNombre = 20;
+        let anchoTexto = fontNombre.widthOfTextAtSize(nombreTexto, fontSizeNombre);
 
-        // Nombre completo del participante en mayúsculas
-        const nombreTexto = sesionActiva.nombre.toUpperCase();
-        let fontSizeNombre = 22;
-        let anchoTexto = fontBold.widthOfTextAtSize(nombreTexto, fontSizeNombre);
-
-        const anchoMaximo = width - 80;
+        // Ajuste automático solo si el nombre supera el ancho útil de la hoja
+        const anchoMaximo = width - 90;
         while (anchoTexto > anchoMaximo && fontSizeNombre > 13) {
-          fontSizeNombre -= 1;
-          anchoTexto = fontBold.widthOfTextAtSize(nombreTexto, fontSizeNombre);
+          fontSizeNombre -= 0.5;
+          anchoTexto = fontNombre.widthOfTextAtSize(nombreTexto, fontSizeNombre);
         }
 
         const posXNombre = (width - anchoTexto) / 2;
-        const posYNombre = height * 0.50;
+        const posYNombre = height * 0.453; // Posición vertical exacta entre "a" y "Por su participación..."
 
         primeraPagina.drawText(nombreTexto, {
           x: posXNombre,
           y: posYNombre,
           size: fontSizeNombre,
-          font: fontBold,
-          color: rgb(0.67, 0.00, 0.20) // Guinda oficial #AB0033
-        });
-
-        // Folio de verificación en la parte inferior
-        const folioTexto = `Folio de verificación: USJT-CONGRESO-${sesionActiva.usuario.toUpperCase()}-2026`;
-        const fontSizeFolio = 9;
-        const anchoFolio = fontRegular.widthOfTextAtSize(folioTexto, fontSizeFolio);
-
-        primeraPagina.drawText(folioTexto, {
-          x: (width - anchoFolio) / 2,
-          y: 28,
-          size: fontSizeFolio,
-          font: fontRegular,
-          color: rgb(0.33, 0.34, 0.35) // Gris oficial #54565A
+          font: fontNombre,
+          color: rgb(0.329, 0.337, 0.353) // Gris oficial #54565A
         });
 
         const pdfFinalBytes = await pdfDoc.save();
