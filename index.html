@@ -69,10 +69,13 @@
                         radial-gradient(circle at bottom left, rgba(171, 0, 51, 0.07), transparent 50%);
     }
 
-    /* BARRA CENTRADA DEL CONTADOR DE REGISTRADOS */
-    .contador-top-wrap {
+    /* BARRA DEL CONTADOR ALINEADA AL CENTRO DE LA COLUMNA IZQUIERDA */
+    .contador-top-grid {
       max-width: 1240px; width: 100%; margin: 0 auto 18px;
-      display: flex; justify-content: center; align-items: center; min-height: 52px;
+      display: grid; grid-template-columns: 1.38fr 0.62fr; gap: 32px; align-items: center; min-height: 52px;
+    }
+    .contador-col-izq {
+      display: flex; justify-content: center; align-items: center;
     }
     .contador-banner {
       display: none; align-items: center; gap: 14px;
@@ -270,6 +273,7 @@
     @media (max-width: 1024px) {
       header { padding: 14px 18px; }
       .brand-title h1 { font-size: 16px; }
+      .contador-top-grid { grid-template-columns: 1fr; gap: 0; }
       .contador-banner { font-size: 15.5px; padding: 10px 22px; }
       .contador-banner .icono-reg { font-size: 18px; }
       .contador-banner strong { font-size: 19px; }
@@ -310,11 +314,13 @@
 
   <!-- VISTA 1: PORTAL DE INICIO DE SESIÓN -->
   <main id="portal-view">
-    <!-- CONTADOR DE PERSONAS REGISTRADAS CENTRADO -->
-    <div class="contador-top-wrap">
-      <div class="contador-banner" id="badge-registrados">
-        <span class="icono-reg">👥</span>
-        <span><strong id="num-registrados">0</strong> personas registradas</span>
+    <!-- CONTADOR DE PERSONAS REGISTRADAS CENTRADO SOBRE EL RECUADRO DEL CONGRESO -->
+    <div class="contador-top-grid">
+      <div class="contador-col-izq">
+        <div class="contador-banner" id="badge-registrados">
+          <span class="icono-reg">👥</span>
+          <span><strong id="num-registrados">0</strong> personas registradas</span>
+        </div>
       </div>
     </div>
 
