@@ -71,18 +71,21 @@
 
     /* BARRA CENTRADA DEL CONTADOR DE REGISTRADOS */
     .contador-top-wrap {
-      max-width: 1240px; width: 100%; margin: 0 auto 16px;
-      display: flex; justify-content: center; align-items: center; min-height: 44px;
+      max-width: 1240px; width: 100%; margin: 0 auto 18px;
+      display: flex; justify-content: center; align-items: center; min-height: 52px;
     }
     .contador-banner {
-      display: none; align-items: center; gap: 12px;
+      display: none; align-items: center; gap: 14px;
       background: #FFFFFF; color: var(--gris-oscuro);
-      font-weight: 700; font-size: 16.5px; padding: 11px 28px;
+      font-weight: 700; font-size: 19px; padding: 13px 34px;
       border-radius: 999px; border: 2px solid var(--oro);
-      box-shadow: 0 4px 14px rgba(84, 86, 90, 0.10);
+      box-shadow: 0 5px 16px rgba(84, 86, 90, 0.11);
+    }
+    .contador-banner .icono-reg {
+      font-size: 22px; line-height: 1;
     }
     .contador-banner strong {
-      color: var(--guinda); font-size: 20px; font-weight: 800; letter-spacing: -0.3px;
+      color: var(--guinda); font-size: 24px; font-weight: 800; letter-spacing: -0.4px;
     }
 
     .portal-grid {
@@ -267,8 +270,9 @@
     @media (max-width: 1024px) {
       header { padding: 14px 18px; }
       .brand-title h1 { font-size: 16px; }
-      .contador-banner { font-size: 14.5px; padding: 9px 20px; }
-      .contador-banner strong { font-size: 17px; }
+      .contador-banner { font-size: 15.5px; padding: 10px 22px; }
+      .contador-banner .icono-reg { font-size: 18px; }
+      .contador-banner strong { font-size: 19px; }
       .portal-grid { grid-template-columns: 1fr; gap: 24px; }
       .hero-congreso { flex-direction: column; text-align: center; }
       .hero-tags-row { justify-content: center; }
@@ -306,11 +310,11 @@
 
   <!-- VISTA 1: PORTAL DE INICIO DE SESIÓN -->
   <main id="portal-view">
-    <!-- CONTADOR DE PARTICIPANTES CENTRADO -->
+    <!-- CONTADOR DE PERSONAS REGISTRADAS CENTRADO -->
     <div class="contador-top-wrap">
       <div class="contador-banner" id="badge-registrados">
-        <span>👥</span>
-        <span><strong id="num-registrados">0</strong> participantes registrados</span>
+        <span class="icono-reg">👥</span>
+        <span><strong id="num-registrados">0</strong> personas registradas</span>
       </div>
     </div>
 
