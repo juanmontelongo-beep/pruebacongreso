@@ -63,13 +63,30 @@
 
     /* VISTA PORTAL DE INICIO */
     #portal-view {
-      flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 24px 18px;
+      flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 20px 24px 18px;
       background-color: var(--fondo-claro);
       background-image: radial-gradient(circle at top right, rgba(221, 201, 163, 0.28), transparent 52%),
                         radial-gradient(circle at bottom left, rgba(171, 0, 51, 0.07), transparent 50%);
     }
+
+    /* BARRA CENTRADA DEL CONTADOR DE REGISTRADOS */
+    .contador-top-wrap {
+      max-width: 1240px; width: 100%; margin: 0 auto 16px;
+      display: flex; justify-content: center; align-items: center; min-height: 44px;
+    }
+    .contador-banner {
+      display: none; align-items: center; gap: 12px;
+      background: #FFFFFF; color: var(--gris-oscuro);
+      font-weight: 700; font-size: 16.5px; padding: 11px 28px;
+      border-radius: 999px; border: 2px solid var(--oro);
+      box-shadow: 0 4px 14px rgba(84, 86, 90, 0.10);
+    }
+    .contador-banner strong {
+      color: var(--guinda); font-size: 20px; font-weight: 800; letter-spacing: -0.3px;
+    }
+
     .portal-grid {
-      max-width: 1240px; width: 100%; margin: auto; display: grid;
+      max-width: 1240px; width: 100%; margin: 0 auto; display: grid;
       grid-template-columns: 1.38fr 0.62fr; gap: 32px; align-items: stretch;
     }
     .event-info {
@@ -96,11 +113,6 @@
       display: inline-flex; align-items: center; gap: 8px; background: var(--arena-clara); color: var(--guinda);
       font-weight: 700; font-size: 11.5px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--oro);
     }
-    .tag-registrados {
-      display: none; align-items: center; gap: 6px; background: #FFFFFF; color: var(--gris-oscuro);
-      font-weight: 700; font-size: 11.5px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--oro);
-    }
-    .tag-registrados strong { color: var(--guinda); }
     .dot-pulse { width: 8px; height: 8px; background: var(--guinda); border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
@@ -255,6 +267,8 @@
     @media (max-width: 1024px) {
       header { padding: 14px 18px; }
       .brand-title h1 { font-size: 16px; }
+      .contador-banner { font-size: 14.5px; padding: 9px 20px; }
+      .contador-banner strong { font-size: 17px; }
       .portal-grid { grid-template-columns: 1fr; gap: 24px; }
       .hero-congreso { flex-direction: column; text-align: center; }
       .hero-tags-row { justify-content: center; }
@@ -292,6 +306,14 @@
 
   <!-- VISTA 1: PORTAL DE INICIO DE SESIÓN -->
   <main id="portal-view">
+    <!-- CONTADOR DE PARTICIPANTES CENTRADO -->
+    <div class="contador-top-wrap">
+      <div class="contador-banner" id="badge-registrados">
+        <span>👥</span>
+        <span><strong id="num-registrados">0</strong> participantes registrados</span>
+      </div>
+    </div>
+
     <div class="portal-grid">
       <section class="event-info">
         <!-- LOGO DEL CONGRESO EN GRANDE + TÍTULO OFICIAL -->
@@ -302,7 +324,6 @@
           <div class="hero-texto">
             <div class="hero-tags-row">
               <div class="tag-vivo"><span class="dot-pulse"></span> TRANSMISIÓN EN DIRECTO</div>
-              <div class="tag-registrados" id="badge-registrados">👥 <strong id="num-registrados">0</strong> registrados</div>
             </div>
             <h2>Congreso de Seguridad Pública</h2>
             <div class="lema">“Coordinación, Inteligencia y Desafíos”</div>
@@ -439,7 +460,7 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwETkm4XexIlgyKxEy104ofdK2sFK6uhH0eGuguKZqhg0lPlVUVdsMrYdk1X0oVXtcdjw/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwb-Bt2a4pVXAMF7KvMirmbeoK8FEq3uCOyYsres65h3t2npNdH2HGXgpS0C1um1leH/exec';
 
     let sesionActiva = null;
     let segundosPendientes = 0;
